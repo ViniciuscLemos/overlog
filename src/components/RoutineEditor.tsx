@@ -111,14 +111,14 @@ export function RoutineEditor({ id }: { id: number }) {
                   Reps
                   <span className="range">
                     <input
-                      type="number" inputMode="numeric" aria-label="Repetições mínimas"
+                      type="number" inputMode="numeric" min={LIMITS.reps[0]} max={LIMITS.reps[1]} aria-label="Repetições mínimas"
                       value={Number.isNaN(item.repMin) ? '' : item.repMin}
                       onChange={(e) => type(i, { repMin: e.target.valueAsNumber })}
                       onBlur={settle}
                     />
                     –
                     <input
-                      type="number" inputMode="numeric" aria-label="Repetições máximas"
+                      type="number" inputMode="numeric" min={LIMITS.reps[0]} max={LIMITS.reps[1]} aria-label="Repetições máximas"
                       value={Number.isNaN(item.repMax) ? '' : item.repMax}
                       onChange={(e) => type(i, { repMax: e.target.valueAsNumber })}
                       onBlur={settle}
