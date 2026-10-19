@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect } from 'react';
 import { createRoutine, db, moveRoutine } from '../lib/db';
 import { nextInRotation, suggestName, totalSets } from '../lib/routines';
+import { Backup } from './Backup';
 
 export function Routines() {
   const routines = useLiveQuery(() => db.routines.orderBy('position').toArray());
@@ -65,6 +66,8 @@ export function Routines() {
       <button type="button" className="more" onClick={newRoutine}>
         + Novo treino
       </button>
+
+      <Backup routineCount={routines.length} />
     </section>
   );
 }
