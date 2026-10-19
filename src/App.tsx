@@ -10,6 +10,7 @@ import { Workout } from './components/Workout';
 import { activeWorkout, db, saveRoutine } from './lib/db';
 import { addExercise } from './lib/routines';
 import type { Filters } from './lib/exercises';
+import { lang, setLang, t } from './lib/i18n';
 
 const isList = (hash: string) => hash.replace(/^#\/?/, '') === '';
 
@@ -79,8 +80,8 @@ export default function App() {
   else if (adding) {
     page = (
       <>
-        <a className="back" href={`#/treinos/${adding[1]}`}>‹ Voltar ao treino</a>
-        <h2 className="pick-title">Adicionar exercício</h2>
+        <a className="back" href={`#/treinos/${adding[1]}`}>{t.library.backToWorkout}</a>
+        <h2 className="pick-title">{t.library.addTitle}</h2>
         <Library
           filters={pickFilters}
           onFilters={setPickFilters}
@@ -113,22 +114,25 @@ export default function App() {
           Overlog
         </a>
         <nav>
-          <a href="#/" aria-current={exercise || studies || routines ? undefined : 'page'}>Exercícios</a>
-          <a href="#/treinos" aria-current={routines ? 'page' : undefined}>Treinos</a>
-          <a href="#/estudos" aria-current={studies ? 'page' : undefined}>Estudos</a>
+          <a href="#/" aria-current={exercise || studies || routines ? undefined : 'page'}>{t.nav.exercises}</a>
+          <a href="#/treinos" aria-current={routines ? 'page' : undefined}>{t.nav.workouts}</a>
+          <a href="#/estudos" aria-current={studies ? 'page' : undefined}>{t.nav.studies}</a>
         </nav>
       </header>
       {active && !logging && route !== 'treinos' && (
         <a className="in-progress" href={`#/treino/${active.id}`}>
-          {active.name} em andamento · <u>voltar pro treino</u>
+          {t.inProgress(active.name)} · <u>{t.backToWorkout}</u>
         </a>
       )}
       <main>
         {page}
       </main>
       <footer className="credits">
-        Desenhos dos exercícios: <a href="https://github.com/everkinetic/data">Everkinetic</a> (CC BY-SA 4.0).{' '}
-        Código aberto no <a href="https://github.com/ViniciuscLemos/overlog">GitHub</a>.
+        {t.credits.drawings} <a href="https://github.com/everkinetic/data">Everkinetic</a> (CC BY-SA 4.0).{' '}
+        {t.credits.code} <a href="https://github.com/ViniciuscLemos/overlog">GitHub</a>.{' '}
+        <button type="button" className="clear" onClick={() => setLang(lang === 'pt' ? 'en' : 'pt')}>
+          {t.credits.other}
+        </button>
       </footer>
     </>
   );

@@ -4,6 +4,7 @@ import {
   addSet, db, discardWorkout, exerciseHistory, finishWorkout, removeSet, saveNote, updateSet, workoutSets, type LoggedSet,
 } from '../lib/db';
 import { displayName, imageUrl, loadExercises, type Exercise } from '../lib/exercises';
+import { t } from '../lib/i18n';
 import { restLabel } from '../lib/routines';
 import {
   clockLabel, durationLabel, formatKg, formatSet, incrementFor, nextStep, parseNumber, stepText, type PlannedExercise,
@@ -67,8 +68,8 @@ export function Workout({ id }: { id: number }) {
   }, [workout]);
 
   if (workout === undefined || sets === undefined) return null;
-  if (!workout) return <p className="muted">Esse treino não existe mais. <a href="#/treinos">Voltar</a></p>;
-  if (workout.finishedAt) return <p className="muted">Esse treino já terminou. <a href={`#/historico/${id}`}>Ver resumo</a></p>;
+  if (!workout) return <p className="muted">{t.editor.missing} <a href="#/treinos">{t.back}</a></p>;
+  if (workout.finishedAt) return <p className="muted">{t.workout.finished} <a href={`#/historico/${id}`}>{t.workout.seeSummary}</a></p>;
 
   const people = [undefined, ...(workout.partners ?? [])];
   const nextPerson = () => setWho(people[(people.indexOf(who) + 1) % people.length]);
@@ -80,19 +81,19 @@ export function Workout({ id }: { id: number }) {
     const done = sets!.filter((s) => s.done).length;
     const open = sets!.length - done;
     if (!done) {
-      if (window.confirm('Nenhuma série marcada. Descartar esse treino?')) {
+      if (window.confirm(t.workout.noneChecked)) {
         await discardWorkout(id);
         window.location.hash = '#/treinos';
       }
       return;
     }
-    if (open && !window.confirm(`${open} ${open === 1 ? 'série sem ✓ fica' : 'séries sem ✓ ficam'} de fora. Terminar?`)) return;
+    if (open && !window.confirm(t.workout.leftOut(open))) return;
     await finishWorkout(id);
     window.location.hash = `#/historico/${id}`;
   }
 
   async function discard() {
-    if (!window.confirm('Descartar esse treino? O que foi anotado nele some.')) return;
+    if (!window.confirm(t.workout.discardAsk)) return;
     await discardWorkout(id);
     window.location.hash = '#/treinos';
   }
@@ -100,7 +101,7 @@ export function Workout({ id }: { id: number }) {
   return (
     <section className="workout">
       <h2>{workout.name}</h2>
-      <p className="count">Começou há {durationLabel(now - workout.startedAt)}</p>
+      <p className="count">{t.workout.started(durationLabel(now - workout.startedAt))}</p>
 
       {workout.plan.map((plan, slot) => (
         <ExerciseBlock
@@ -117,11 +118,11 @@ export function Workout({ id }: { id: number }) {
         />
       ))}
 
-      <button type="button" className="danger discard" onClick={discard}>Descartar treino</button>
+      <button type="button" className="danger discard" onClick={discard}>{t.workout.discard}</button>
 
       <div className="workout-bar">
         {people.length > 1 && (
-          <div className="people" role="group" aria-label="Quem está anotando">
+          <div className="people" role="group" aria-label={t.workout.who}>
             {people.map((person) => (
               <button
                 key={person ?? ''}
@@ -130,21 +131,21 @@ export function Workout({ id }: { id: number }) {
                 aria-pressed={person === who}
                 onClick={() => setWho(person)}
               >
-                {person ?? 'Eu'}
+                {person ?? t.workout.me}
               </button>
             ))}
           </div>
         )}
         <span>
           {lastDone && restLeft > 0 ? (
-            <>Descanso <strong>{clockLabel(restLeft)}</strong></>
+            <>{t.workout.rest} <strong>{clockLabel(restLeft)}</strong></>
           ) : lastDone ? (
-            'Descanso acabou'
+            t.workout.restOver
           ) : (
-            `${sets.length} séries`
+            t.workout.sets(sets.length)
           )}
         </span>
-        <button type="button" className="primary" onClick={finish}>Terminar</button>
+        <button type="button" className="primary" onClick={finish}>{t.workout.finish}</button>
       </div>
     </section>
   );
@@ -182,11 +183,11 @@ function ExerciseBlock({ workoutId, slot, plan, exercise, who, note, sets, last:
         <a href={`#/exercicio/${plan.exerciseId}`}>{exercise ? displayName(exercise) : plan.exerciseId}</a>
       </div>
       <p className="target">
-        {plan.sets} × {plan.repMin}–{plan.repMax} · descanso {restLabel(plan.restSeconds)}
+        {t.workout.target(plan.sets, plan.repMin, plan.repMax, restLabel(plan.restSeconds))}
         {plan.note && ` · ${plan.note}`}
       </p>
-      {last.length > 0 && <p className="last">Última vez: {last.map(formatSet).join(' · ')}</p>}
-      {lastNote && <p className="last">Anotação da última vez: {lastNote}</p>}
+      {last.length > 0 && <p className="last">{t.workout.last} {last.map(formatSet).join(' · ')}</p>}
+      {lastNote && <p className="last">{t.workout.lastNote} {lastNote}</p>}
       <p className="step">{stepText(step, bodyweight)}</p>
 
       <div className="set-row set-head" aria-hidden="true">
@@ -211,9 +212,9 @@ function ExerciseBlock({ workoutId, slot, plan, exercise, who, note, sets, last:
         );
       })}
       <div className="set-actions">
-        <button type="button" className="secondary" onClick={() => addSet(workoutId, slot, plan.exerciseId, who)}>+ Série</button>
+        <button type="button" className="secondary" onClick={() => addSet(workoutId, slot, plan.exerciseId, who)}>{t.workout.addSet}</button>
         {removable && sets.length > 1 && (
-          <button type="button" className="secondary" onClick={() => removeSet(removable.id!)}>− Série</button>
+          <button type="button" className="secondary" onClick={() => removeSet(removable.id!)}>{t.workout.removeSet}</button>
         )}
       </div>
       <NoteInput workoutId={workoutId} slot={slot} note={note} />
@@ -226,7 +227,7 @@ function NoteInput({ workoutId, slot, note }: { workoutId: number; slot: number;
   return (
     <input
       className="note"
-      placeholder="Anotação de hoje (ombro incomodou, máquina diferente...)"
+      placeholder={t.workout.note}
       value={text}
       onChange={(e) => {
         setText(e.target.value);
@@ -280,7 +281,7 @@ function SetRow({ index, set, bodyweight, weightHint, repsHint, onDone }: RowPro
       <input
         ref={weightInput}
         inputMode="decimal"
-        aria-label={`Carga da série ${index + 1}`}
+        aria-label={t.workout.weight(index + 1)}
         placeholder={weightHint !== undefined ? formatKg(weightHint) : bodyweight ? '0' : 'kg'}
         value={weight}
         onChange={(e) => setWeight(e.target.value)}
@@ -289,7 +290,7 @@ function SetRow({ index, set, bodyweight, weightHint, repsHint, onDone }: RowPro
       <input
         ref={repsInput}
         inputMode="numeric"
-        aria-label={`Repetições da série ${index + 1}`}
+        aria-label={t.workout.reps(index + 1)}
         placeholder={repsHint !== undefined ? String(repsHint) : '–'}
         value={reps}
         onChange={(e) => setReps(e.target.value)}
@@ -297,13 +298,13 @@ function SetRow({ index, set, bodyweight, weightHint, repsHint, onDone }: RowPro
       />
       <input
         inputMode="numeric"
-        aria-label={`Reps na reserva da série ${index + 1}`}
+        aria-label={t.workout.rir(index + 1)}
         placeholder="–"
         value={rir}
         onChange={(e) => setRir(e.target.value)}
         onBlur={() => save({ rir: parseNumber(rir) })}
       />
-      <button type="button" className="tick" aria-pressed={set.done} aria-label={`Marcar série ${index + 1}`} onClick={toggle}>
+      <button type="button" className="tick" aria-pressed={set.done} aria-label={t.workout.tick(index + 1)} onClick={toggle}>
         ✓
       </button>
     </div>

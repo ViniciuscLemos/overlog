@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { exerciseHistory } from '../lib/db';
+import { t } from '../lib/i18n';
 import { dateLabel, estimatedMax, formatKg, formatSet } from '../lib/workouts';
 
 const W = 320;
@@ -18,7 +19,7 @@ function Chart({ points }: { points: { date: number; value: number }[] }) {
 
   return (
     <figure className="chart">
-      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Evolução da carga estimada por treino">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={t.exercise.chartLabel}>
         <line x1={PAD} x2={W - PAD} y1={H - PAD} y2={H - PAD} stroke="currentColor" opacity="0.2" />
         <polyline points={line} fill="none" stroke="currentColor" strokeWidth="2" />
         {points.map((p, i) => (
@@ -26,8 +27,7 @@ function Chart({ points }: { points: { date: number; value: number }[] }) {
         ))}
       </svg>
       <figcaption>
-        {formatKg(Math.round(values[0]))} → {formatKg(Math.round(values[values.length - 1]))} kg estimados
-        (melhor série de cada treino)
+        {t.exercise.chartCaption(formatKg(Math.round(values[0])), formatKg(Math.round(values[values.length - 1])))}
       </figcaption>
     </figure>
   );
@@ -48,7 +48,7 @@ export function ExerciseHistory({ exerciseId }: { exerciseId: string }) {
 
   return (
     <>
-      <h3 className="similar-title">Histórico</h3>
+      <h3 className="similar-title">{t.exercise.history}</h3>
       {weighted && points.length > 1 && <Chart points={points} />}
       <ul className="list">
         {sessions.slice(0, 6).map((s) => (

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { backupFileName, importShared, isSharedWorkout, makeBackup, parseBackup, restoreBackup } from '../lib/backup';
+import { t } from '../lib/i18n';
 import { dateLabel } from '../lib/workouts';
 
 export function Backup({ routineCount }: { routineCount: number }) {
@@ -34,32 +35,29 @@ export function Backup({ routineCount }: { routineCount: number }) {
       })();
       if (isSharedWorkout(data)) {
         const when = dateLabel(data.workout.startedAt);
-        if (!window.confirm(`Adicionar o ${data.workout.name} de ${when} ao seu histórico?`)) return;
+        if (!window.confirm(t.backup.importAsk(data.workout.name, when))) return;
         const id = await importShared(data);
         window.location.hash = `#/historico/${id}`;
         return;
       }
       const backup = parseBackup(text);
       const count = backup.routines.length;
-      const replace = routineCount > 0 ? ` Os ${routineCount} treinos de agora vão ser trocados pelos do arquivo.` : '';
-      if (!window.confirm(`Restaurar ${count} ${count === 1 ? 'treino' : 'treinos'}?${replace}`)) return;
+      const replace = routineCount > 0 ? t.backup.replace(routineCount) : '';
+      if (!window.confirm(`${t.backup.restoreAsk(count)}${replace}`)) return;
       await restoreBackup(backup);
-      setMessage(`${count} ${count === 1 ? 'treino restaurado' : 'treinos restaurados'}.`);
+      setMessage(t.backup.restored(count));
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : 'Não deu pra ler esse arquivo.');
+      setMessage(e instanceof Error ? e.message : t.backup.unreadable);
     }
   }
 
   return (
     <div className="backup">
-      <p className="muted">
-        Tudo fica só nesse celular. Salva um backup de vez em quando, pra não perder se trocar de celular ou limpar o
-        navegador. Treinou em dupla? O arquivo que seu parceiro mandou entra em Importar treino.
-      </p>
+      <p className="muted">{t.backup.text}</p>
       <div className="editor-actions">
-        <button type="button" className="secondary" onClick={save}>Salvar backup</button>
-        <button type="button" className="secondary" onClick={() => input.current?.click()}>Restaurar backup</button>
-        <button type="button" className="secondary" onClick={() => input.current?.click()}>Importar treino</button>
+        <button type="button" className="secondary" onClick={save}>{t.backup.save}</button>
+        <button type="button" className="secondary" onClick={() => input.current?.click()}>{t.backup.restore}</button>
+        <button type="button" className="secondary" onClick={() => input.current?.click()}>{t.backup.import}</button>
       </div>
       <input
         ref={input}

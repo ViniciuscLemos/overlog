@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { displayName, imageUrl, loadExercises, search, type Exercise, type Filters } from '../lib/exercises';
+import { t } from '../lib/i18n';
 import { EQUIPMENT, EQUIPMENT_ORDER, MUSCLES, MUSCLE_ORDER } from '../lib/labels';
 
 const PAGE = 40;
@@ -39,20 +40,20 @@ export function Library({ filters, onFilters, onPick, alreadyIn }: Props) {
       <div className="search">
         <input
           type="search"
-          placeholder="Buscar exercício"
+          placeholder={t.library.search}
           value={filters.text}
           onChange={(e) => set({ text: e.target.value })}
           // close the keyboard on the phone
           onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
           enterKeyHint="search"
-          aria-label="Buscar exercício"
+          aria-label={t.library.search}
         />
         <select
           value={filters.muscle ?? ''}
           onChange={(e) => set({ muscle: e.target.value || null })}
-          aria-label="Músculo"
+          aria-label={t.library.muscle}
         >
-          <option value="">Todos os músculos</option>
+          <option value="">{t.library.allMuscles}</option>
           {MUSCLE_ORDER.filter((m) => !all || perMuscle[m] || m === filters.muscle).map((m) => (
             <option key={m} value={m}>
               {MUSCLES[m]} ({perMuscle[m] ?? 0})
@@ -61,7 +62,7 @@ export function Library({ filters, onFilters, onPick, alreadyIn }: Props) {
         </select>
       </div>
 
-      <div className="chips" role="group" aria-label="Equipamento">
+      <div className="chips" role="group" aria-label={t.library.equipment}>
         {EQUIPMENT_ORDER.map((eq) => (
           <button
             key={eq}
@@ -76,16 +77,16 @@ export function Library({ filters, onFilters, onPick, alreadyIn }: Props) {
       </div>
 
       {!all ? (
-        <p className="muted">Carregando exercícios…</p>
+        <p className="muted">{t.library.loading}</p>
       ) : (
         <>
           <p className="count">
-            {results.length} {results.length === 1 ? 'exercício' : 'exercícios'}
+            {t.library.count(results.length)}
             {(filters.text || filters.equipment || filters.muscle) && (
               <>
                 {' · '}
                 <button type="button" className="clear" onClick={() => onFilters({ text: '', equipment: null, muscle: null })}>
-                  limpar filtros
+                  {t.library.clear}
                 </button>
               </>
             )}
@@ -104,10 +105,10 @@ export function Library({ filters, onFilters, onPick, alreadyIn }: Props) {
                   <img src={imageUrl(e.images[0])} alt="" loading="lazy" width={72} height={72} />
                   <span>
                     <strong>{displayName(e)}</strong>
-                    {e.pt && <small>{e.en}</small>}
+                    {e.pt && e.pt === displayName(e) && <small>{e.en}</small>}
                     <em>
                       {EQUIPMENT[e.equipment]} · {e.primary.map((m) => MUSCLES[m] ?? m).join(', ')}
-                      {alreadyIn?.has(e.id) && ' · já está no treino'}
+                      {alreadyIn?.has(e.id) && ` · ${t.library.alreadyIn}`}
                     </em>
                   </span>
                 </a>
@@ -116,15 +117,15 @@ export function Library({ filters, onFilters, onPick, alreadyIn }: Props) {
           </ul>
           {shown < results.length && (
             <button type="button" className="more" onClick={() => setShown(shown + PAGE)}>
-              Mostrar mais ({results.length - shown})
+              {t.library.more(results.length - shown)}
             </button>
           )}
           {results.length === 0 && (
             <p className="muted">
-              Nada com esses filtros.{' '}
+              {t.library.none}{' '}
               {filters.text && (filters.equipment || filters.muscle) && (
                 <button type="button" className="clear" onClick={() => set({ equipment: null, muscle: null })}>
-                  Buscar "{filters.text}" em tudo
+                  {t.library.searchAll(filters.text)}
                 </button>
               )}
             </p>

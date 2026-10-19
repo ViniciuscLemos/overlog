@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect } from 'react';
 import { activeWorkout, createRoutine, db, lastFinishedWorkout, lastPartners, moveRoutine, startWorkout } from '../lib/db';
 import { nextInRotation, suggestName, totalSets } from '../lib/routines';
+import { t } from '../lib/i18n';
 import { dateLabel } from '../lib/workouts';
 import { Backup } from './Backup';
 
@@ -12,7 +13,7 @@ export function Routines() {
   const next = routines && nextInRotation(routines, last?.routineId ?? null);
 
   useEffect(() => {
-    document.title = 'Treinos · Overlog';
+    document.title = `${t.routines.title} · Overlog`;
     return () => {
       document.title = 'Overlog';
     };
@@ -29,7 +30,7 @@ export function Routines() {
 
   // same phone, one person after the other; each one's sets stay apart
   async function startTogether(routineId: number) {
-    const name = window.prompt('Nome de quem vai treinar com você', (await lastPartners())[0] ?? '');
+    const name = window.prompt(t.routines.partnerName, (await lastPartners())[0] ?? '');
     if (name?.trim()) await start(routineId, [name.trim()]);
   }
 
@@ -37,27 +38,24 @@ export function Routines() {
 
   return (
     <section className="routines">
-      <h2>Treinos</h2>
-      <p className="intro">
-        Monta quantos quiser, na ordem que você faz. Depois do último volta pro primeiro, não fica preso a dia da
-        semana.
-      </p>
+      <h2>{t.routines.title}</h2>
+      <p className="intro">{t.routines.intro}</p>
 
       {active ? (
-        <a className="primary as-button" href={`#/treino/${active.id}`}>Continuar {active.name}</a>
+        <a className="primary as-button" href={`#/treino/${active.id}`}>{t.routines.continue(active.name)}</a>
       ) : (
         next && next.exercises.length > 0 && (
           <>
-            <button type="button" className="primary" onClick={() => start(next.id!)}>Começar {next.name}</button>
+            <button type="button" className="primary" onClick={() => start(next.id!)}>{t.routines.start(next.name)}</button>
             <button type="button" className="secondary together" onClick={() => startTogether(next.id!)}>
-              Treinar em dupla
+              {t.routines.together}
             </button>
           </>
         )
       )}
       {last && (
         <p className="count">
-          Último: {last.name}, {dateLabel(last.startedAt)} · <a href="#/historico">histórico</a>
+          {t.routines.last} {last.name}, {dateLabel(last.startedAt)} · <a href="#/historico">{t.routines.history}</a>
         </p>
       )}
 
@@ -67,17 +65,17 @@ export function Routines() {
             <a href={`#/treinos/${r.id}`} className="routine">
               <strong>{r.name}</strong>
               <em>
-                {r.exercises.length} {r.exercises.length === 1 ? 'exercício' : 'exercícios'} · {totalSets(r)} séries
-                {r.id === next?.id && ' · próximo'}
+                {t.routines.exercises(r.exercises.length)} · {t.routines.sets(totalSets(r))}
+                {r.id === next?.id && ` · ${t.routines.next}`}
               </em>
             </a>
             <span className="order">
-              <button type="button" aria-label={`Subir ${r.name}`} disabled={i === 0} onClick={() => moveRoutine(r.id!, -1)}>
+              <button type="button" aria-label={t.routines.up(r.name)} disabled={i === 0} onClick={() => moveRoutine(r.id!, -1)}>
                 ↑
               </button>
               <button
                 type="button"
-                aria-label={`Descer ${r.name}`}
+                aria-label={t.routines.down(r.name)}
                 disabled={i === routines.length - 1}
                 onClick={() => moveRoutine(r.id!, 1)}
               >
@@ -89,12 +87,10 @@ export function Routines() {
       </ol>
 
       {routines.length === 0 && (
-        <p className="muted">
-          Nenhum treino ainda. Cria um pra cada dia da sua divisão (Upper 1, Lower 1...).
-        </p>
+        <p className="muted">{t.routines.empty}</p>
       )}
       <button type="button" className="more" onClick={newRoutine}>
-        + Novo treino
+        {t.routines.new}
       </button>
 
       <Backup routineCount={routines.length} />

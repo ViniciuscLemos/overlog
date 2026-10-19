@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useState } from 'react';
 import { db, deleteRoutine, duplicateRoutine, saveRoutine, startWorkout } from '../lib/db';
 import { displayName, imageUrl, loadExercises, type Exercise } from '../lib/exercises';
+import { t } from '../lib/i18n';
 import { MUSCLES } from '../lib/labels';
 import { LIMITS, move, removeAt, restLabel, setsPerMuscle, tidy, totalSets, type Routine, type RoutineExercise } from '../lib/routines';
 
@@ -29,7 +30,7 @@ export function RoutineEditor({ id }: { id: number }) {
   }, [routine]);
 
   if (routine === undefined || (routine && !draft)) return null;
-  if (!routine || !draft) return <p className="muted">Esse treino não existe mais. <a href="#/treinos">Voltar</a></p>;
+  if (!routine || !draft) return <p className="muted">{t.editor.missing} <a href="#/treinos">{t.back}</a></p>;
 
   const setExercises = (exercises: RoutineExercise[]) => {
     setDraft({ ...draft, exercises });
@@ -40,18 +41,18 @@ export function RoutineEditor({ id }: { id: number }) {
   const settle = () => setExercises(draft.exercises.map(tidy));
 
   async function remove() {
-    if (!window.confirm(`Apagar o ${draft!.name}? O histórico dos treinos feitos continua.`)) return;
+    if (!window.confirm(t.editor.remove(draft!.name))) return;
     await deleteRoutine(id);
     window.location.hash = '#/treinos';
   }
 
   return (
     <section className="editor">
-      <a className="back" href="#/treinos">‹ Treinos</a>
+      <a className="back" href="#/treinos">{t.editor.back}</a>
       <input
         className="routine-name"
         value={draft.name}
-        aria-label="Nome do treino"
+        aria-label={t.editor.name}
         enterKeyHint="done"
         onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
         onChange={(e) => {
@@ -60,12 +61,12 @@ export function RoutineEditor({ id }: { id: number }) {
         }}
         onBlur={(e) => {
           if (e.target.value.trim()) return;
-          setDraft({ ...draft, name: 'Treino' });
-          saveRoutine(id, { name: 'Treino' });
+          setDraft({ ...draft, name: t.routines.defaultName });
+          saveRoutine(id, { name: t.routines.defaultName });
         }}
       />
       <p className="count">
-        {draft.exercises.length} {draft.exercises.length === 1 ? 'exercício' : 'exercícios'} · {totalSets(draft)} séries
+        {t.routines.exercises(draft.exercises.length)} · {t.routines.sets(totalSets(draft))}
       </p>
 
       <ul className="list">
@@ -77,19 +78,19 @@ export function RoutineEditor({ id }: { id: number }) {
                 {exercise && <img src={imageUrl(exercise.images[0])} alt="" width={48} height={48} />}
                 <a href={`#/exercicio/${item.exerciseId}`}>{exercise ? displayName(exercise) : item.exerciseId}</a>
                 <span className="order">
-                  <button type="button" aria-label="Subir" disabled={i === 0} onClick={() => setExercises(move(draft.exercises, i, -1))}>↑</button>
+                  <button type="button" aria-label={t.editor.up} disabled={i === 0} onClick={() => setExercises(move(draft.exercises, i, -1))}>↑</button>
                   <button
                     type="button"
-                    aria-label="Descer"
+                    aria-label={t.editor.down}
                     disabled={i === draft.exercises.length - 1}
                     onClick={() => setExercises(move(draft.exercises, i, 1))}
                   >
                     ↓
                   </button>
-                  <button type="button" aria-label="Tirar do treino" onClick={() => {
+                  <button type="button" aria-label={t.editor.takeOut} onClick={() => {
                       // easy to hit by accident next to the arrows
-                      const name = exercise ? displayName(exercise) : 'esse exercício';
-                      if (window.confirm(`Tirar ${name} do treino?`)) setExercises(removeAt(draft.exercises, i));
+                      const name = exercise ? displayName(exercise) : t.editor.thisExercise;
+                      if (window.confirm(t.editor.takeOutAsk(name))) setExercises(removeAt(draft.exercises, i));
                     }}
                   >
                     ✕
@@ -99,7 +100,7 @@ export function RoutineEditor({ id }: { id: number }) {
 
               <div className="slot-fields">
                 <label>
-                  Séries
+                  {t.editor.sets}
                   <input
                     type="number" inputMode="numeric" min={LIMITS.sets[0]} max={LIMITS.sets[1]}
                     value={Number.isNaN(item.sets) ? '' : item.sets}
@@ -108,17 +109,17 @@ export function RoutineEditor({ id }: { id: number }) {
                   />
                 </label>
                 <label>
-                  Reps
+                  {t.editor.reps}
                   <span className="range">
                     <input
-                      type="number" inputMode="numeric" min={LIMITS.reps[0]} max={LIMITS.reps[1]} aria-label="Repetições mínimas"
+                      type="number" inputMode="numeric" min={LIMITS.reps[0]} max={LIMITS.reps[1]} aria-label={t.editor.minReps}
                       value={Number.isNaN(item.repMin) ? '' : item.repMin}
                       onChange={(e) => type(i, { repMin: e.target.valueAsNumber })}
                       onBlur={settle}
                     />
                     –
                     <input
-                      type="number" inputMode="numeric" min={LIMITS.reps[0]} max={LIMITS.reps[1]} aria-label="Repetições máximas"
+                      type="number" inputMode="numeric" min={LIMITS.reps[0]} max={LIMITS.reps[1]} aria-label={t.editor.maxReps}
                       value={Number.isNaN(item.repMax) ? '' : item.repMax}
                       onChange={(e) => type(i, { repMax: e.target.valueAsNumber })}
                       onBlur={settle}
@@ -126,7 +127,7 @@ export function RoutineEditor({ id }: { id: number }) {
                   </span>
                 </label>
                 <label>
-                  Descanso
+                  {t.editor.rest}
                   <select value={item.restSeconds} onChange={(e) => setExercises(draft.exercises.map((x, j) => (j === i ? { ...x, restSeconds: Number(e.target.value) } : x)))}>
                     {(REST_OPTIONS.includes(item.restSeconds) ? REST_OPTIONS : [...REST_OPTIONS, item.restSeconds].sort((a, b) => a - b)).map((s) => (
                       <option key={s} value={s}>{restLabel(s)}</option>
@@ -136,7 +137,7 @@ export function RoutineEditor({ id }: { id: number }) {
               </div>
               <input
                 className="note"
-                placeholder="Nota (banco no 4, pegada fechada...)"
+                placeholder={t.editor.note}
                 value={item.note}
                 onChange={(e) => type(i, { note: e.target.value })}
                 onBlur={settle}
@@ -146,11 +147,11 @@ export function RoutineEditor({ id }: { id: number }) {
         })}
       </ul>
 
-      <a className="more as-button" href={`#/treinos/${id}/adicionar`}>+ Adicionar exercício</a>
+      <a className="more as-button" href={`#/treinos/${id}/adicionar`}>{t.editor.add}</a>
 
       {draft.exercises.length > 0 && byId.size > 0 && (
         <p className="per-muscle">
-          Séries por músculo:{' '}
+          {t.editor.perMuscle}{' '}
           {setsPerMuscle(draft.exercises, (exerciseId) => byId.get(exerciseId)?.primary)
             .map(([muscle, sets]) => `${MUSCLES[muscle] ?? muscle} ${sets}`)
             .join(' · ')}
@@ -164,7 +165,7 @@ export function RoutineEditor({ id }: { id: number }) {
             window.location.hash = `#/treino/${await startWorkout(id)}`;
           }}
         >
-          Começar esse treino
+          {t.editor.start}
         </button>
       )}
       <div className="editor-actions">
@@ -176,9 +177,9 @@ export function RoutineEditor({ id }: { id: number }) {
             if (copy) window.location.hash = `#/treinos/${copy}`;
           }}
         >
-          Duplicar treino
+          {t.editor.duplicate}
         </button>
-        <button type="button" className="danger" onClick={remove}>Apagar treino</button>
+        <button type="button" className="danger" onClick={remove}>{t.editor.delete}</button>
       </div>
     </section>
   );

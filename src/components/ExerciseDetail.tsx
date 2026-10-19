@@ -4,6 +4,7 @@ import { db, saveRoutine } from '../lib/db';
 import { addExercise } from '../lib/routines';
 import { displayName, imageUrl, loadExercises, similar, type Exercise } from '../lib/exercises';
 import { EQUIPMENT, MECHANICS, MUSCLES } from '../lib/labels';
+import { t } from '../lib/i18n';
 import { ExerciseHistory } from './ExerciseHistory';
 
 export function ExerciseDetail({ id }: { id: string }) {
@@ -29,8 +30,8 @@ export function ExerciseDetail({ id }: { id: string }) {
     };
   }, [exercise]);
 
-  if (exercise === undefined) return <p className="muted">Carregando…</p>;
-  if (exercise === null) return <p className="muted">Esse exercício não existe. <a href="#/">Voltar</a></p>;
+  if (exercise === undefined) return <p className="muted">{t.loading}</p>;
+  if (exercise === null) return <p className="muted">{t.exercise.missing} <a href="#/">{t.back}</a></p>;
 
   const muscles = (list: string[]) => list.map((m) => MUSCLES[m] ?? m).join(', ');
   const inRoutines = (routines ?? []).filter((r) => r.exercises.some((e) => e.exerciseId === exercise.id));
@@ -38,25 +39,25 @@ export function ExerciseDetail({ id }: { id: string }) {
   return (
     <article className="detail">
       <div className="detail-top">
-        <a className="back" href="#/">‹ Exercícios</a>
+        <a className="back" href="#/">{t.exercise.back}</a>
         {'share' in navigator && (
           <button
             type="button"
             className="clear"
             onClick={() => navigator.share({ title: displayName(exercise), url: window.location.href }).catch(() => {})}
           >
-            Compartilhar
+            {t.exercise.share}
           </button>
         )}
       </div>
       <h2>{displayName(exercise)}</h2>
-      {exercise.pt && <p className="en">{exercise.en}</p>}
+      {exercise.pt && exercise.pt === displayName(exercise) && <p className="en">{exercise.en}</p>}
 
       <div className="photos">
         {exercise.images.map((img, i) => (
           <figure key={img}>
-            <img src={imageUrl(img)} alt={`${displayName(exercise)}, ${i === 0 ? 'início' : 'fim'}`} />
-            <figcaption>{i === 0 ? 'Início' : 'Fim'}</figcaption>
+            <img src={imageUrl(img)} alt={`${displayName(exercise)}, ${(i === 0 ? t.exercise.start : t.exercise.end).toLowerCase()}`} />
+            <figcaption>{i === 0 ? t.exercise.start : t.exercise.end}</figcaption>
           </figure>
         ))}
       </div>
@@ -65,7 +66,7 @@ export function ExerciseDetail({ id }: { id: string }) {
         <p className="add-to">
           <select
             value=""
-            aria-label="Adicionar a um treino"
+            aria-label={t.exercise.addTo.slice(2)}
             onChange={async (e) => {
               const routine = routines.find((r) => r.id === Number(e.target.value));
               if (!routine) return;
@@ -73,35 +74,35 @@ export function ExerciseDetail({ id }: { id: string }) {
               setAdded(routine.name);
             }}
           >
-            <option value="">+ Adicionar a um treino</option>
+            <option value="">{t.exercise.addTo}</option>
             {routines.map((r) => (
               <option key={r.id} value={r.id}>{r.name}</option>
             ))}
           </select>
-          {added && <span className="muted"> Adicionado ao {added}.</span>}
+          {added && <span className="muted"> {t.exercise.added(added)}</span>}
         </p>
       )}
 
       <dl className="facts">
-        <dt>Equipamento</dt>
+        <dt>{t.exercise.equipment}</dt>
         <dd>{EQUIPMENT[exercise.equipment] ?? exercise.equipment}</dd>
-        <dt>Músculos</dt>
+        <dt>{t.exercise.muscles}</dt>
         <dd>{muscles(exercise.primary)}</dd>
         {exercise.secondary.length > 0 && (
           <>
-            <dt>Ajudam</dt>
+            <dt>{t.exercise.helpers}</dt>
             <dd>{muscles(exercise.secondary)}</dd>
           </>
         )}
         {exercise.mechanic && MECHANICS[exercise.mechanic] && (
           <>
-            <dt>Tipo</dt>
+            <dt>{t.exercise.type}</dt>
             <dd>{MECHANICS[exercise.mechanic]}</dd>
           </>
         )}
         {inRoutines.length > 0 && (
           <>
-            <dt>Nos treinos</dt>
+            <dt>{t.exercise.inWorkouts}</dt>
             <dd>
               {inRoutines.map((r, i) => (
                 <span key={r.id}>
@@ -116,8 +117,8 @@ export function ExerciseDetail({ id }: { id: string }) {
 
       <ExerciseHistory exerciseId={exercise.id} />
 
-      <h3 className="similar-title">Como fazer</h3>
-      <p className="muted">O passo a passo ainda tá em inglês, vou traduzindo aos poucos.</p>
+      <h3 className="similar-title">{t.exercise.howTo}</h3>
+      {t.exercise.englishSteps && <p className="muted">{t.exercise.englishSteps}</p>}
       <ol className="steps" lang="en">
         {exercise.steps.map((step) => (
           <li key={step}>{step}</li>
@@ -126,7 +127,7 @@ export function ExerciseDetail({ id }: { id: string }) {
 
       {others.length > 0 && (
         <>
-          <h3 className="similar-title">Parecidos</h3>
+          <h3 className="similar-title">{t.exercise.similar}</h3>
           <ul className="list">
             {others.map((e) => (
               <li key={e.id}>

@@ -3,9 +3,10 @@ import { useEffect, useState } from 'react';
 import { partnerShare, shareFileName } from '../lib/backup';
 import { db, workoutSets, type LoggedSet } from '../lib/db';
 import { displayName, loadExercises, type Exercise } from '../lib/exercises';
+import { locale, t } from '../lib/i18n';
 import { dateLabel, durationLabel, formatSet, summarize } from '../lib/workouts';
 
-const volumeLabel = (kg: number) => `${Math.round(kg).toLocaleString('pt-BR')} kg`;
+const volumeLabel = (kg: number) => `${Math.round(kg).toLocaleString(locale)} kg`;
 
 function useTitle(title: string) {
   useEffect(() => {
@@ -21,22 +22,22 @@ export function History() {
     const done = await db.workouts.orderBy('startedAt').reverse().filter((w) => w.finishedAt !== null).toArray();
     return Promise.all(done.map(async (w) => ({ ...w, summary: summarize((await workoutSets(w.id!)).filter((s) => !s.who)) })));
   });
-  useTitle('Histórico');
+  useTitle(t.history.title);
 
   if (!workouts) return null;
 
   return (
     <section className="routines">
-      <a className="back" href="#/treinos">‹ Treinos</a>
-      <h2>Histórico</h2>
-      {workouts.length === 0 && <p className="muted">Nenhum treino terminado ainda.</p>}
+      <a className="back" href="#/treinos">{t.editor.back}</a>
+      <h2>{t.history.title}</h2>
+      {workouts.length === 0 && <p className="muted">{t.history.empty}</p>}
       <ul className="rotation">
         {workouts.map((w) => (
           <li key={w.id}>
             <a href={`#/historico/${w.id}`} className="routine">
               <strong>{w.name}</strong>
               <em>
-                {dateLabel(w.startedAt)} · {durationLabel(w.finishedAt! - w.startedAt)} · {w.summary.sets} séries ·{' '}
+                {dateLabel(w.startedAt)} · {durationLabel(w.finishedAt! - w.startedAt)} · {t.history.sets(w.summary.sets)} ·{' '}
                 {volumeLabel(w.summary.volumeKg)}
               </em>
             </a>
@@ -51,20 +52,20 @@ export function WorkoutSummary({ id }: { id: number }) {
   const workout = useLiveQuery(() => db.workouts.get(id), [id]);
   const sets = useLiveQuery(() => workoutSets(id), [id]);
   const [byId, setById] = useState<Map<string, Exercise>>(new Map());
-  useTitle(workout?.name ?? 'Treino');
+  useTitle(workout?.name ?? t.routines.defaultName);
 
   useEffect(() => {
     loadExercises().then((all) => setById(new Map(all.map((e) => [e.id, e]))));
   }, []);
 
   if (workout === undefined || sets === undefined) return null;
-  if (!workout) return <p className="muted">Esse treino não existe mais. <a href="#/historico">Voltar</a></p>;
+  if (!workout) return <p className="muted">{t.history.missing} <a href="#/historico">{t.back}</a></p>;
 
   const mine = sets.filter((s) => !s.who);
   const summary = summarize(mine);
 
   async function remove() {
-    if (!window.confirm(`Apagar o ${workout!.name} de ${dateLabel(workout!.startedAt)} do histórico?`)) return;
+    if (!window.confirm(t.history.remove(workout!.name, dateLabel(workout!.startedAt)))) return;
     await db.transaction('rw', db.workouts, db.sets, async () => {
       await db.sets.where('workoutId').equals(id).delete();
       await db.workouts.delete(id);
@@ -74,18 +75,18 @@ export function WorkoutSummary({ id }: { id: number }) {
 
   return (
     <section className="routines">
-      <a className="back" href="#/historico">‹ Histórico</a>
+      <a className="back" href="#/historico">{t.history.back}</a>
       <h2>{workout.name}</h2>
       <p className="count">{dateLabel(workout.startedAt)}</p>
 
       <dl className="facts summary">
-        <dt>Duração</dt>
-        <dd>{workout.finishedAt ? durationLabel(workout.finishedAt - workout.startedAt) : 'em andamento'}</dd>
-        <dt>Séries</dt>
+        <dt>{t.history.duration}</dt>
+        <dd>{workout.finishedAt ? durationLabel(workout.finishedAt - workout.startedAt) : t.history.inProgress}</dd>
+        <dt>{t.history.setsLabel}</dt>
         <dd>{summary.sets}</dd>
-        <dt>Exercícios</dt>
+        <dt>{t.history.exercises}</dt>
         <dd>{summary.exercises}</dd>
-        <dt>Volume</dt>
+        <dt>{t.history.volume}</dt>
         <dd>{volumeLabel(summary.volumeKg)}</dd>
       </dl>
 
@@ -96,13 +97,13 @@ export function WorkoutSummary({ id }: { id: number }) {
           <h3>{who}</h3>
           <SetList sets={sets.filter((s) => s.who === who)} byId={byId} />
           {workout.finishedAt && (
-            <button type="button" className="secondary" onClick={() => sendPart(id, who)}>Mandar a parte de {who}</button>
+            <button type="button" className="secondary" onClick={() => sendPart(id, who)}>{t.history.send(who)}</button>
           )}
         </div>
       ))}
 
       <div className="editor-actions">
-        <button type="button" className="danger" onClick={remove}>Apagar do histórico</button>
+        <button type="button" className="danger" onClick={remove}>{t.history.removeButton}</button>
       </div>
     </section>
   );
@@ -135,7 +136,7 @@ async function sendPart(workoutId: number, who: string) {
   const shared = await partnerShare(workoutId, who);
   const file = new File([JSON.stringify(shared)], shareFileName(who, shared.workout.startedAt), { type: 'application/json' });
   if (navigator.canShare?.({ files: [file] })) {
-    await navigator.share({ files: [file], title: `Treino de ${who}` }).catch(() => {});
+    await navigator.share({ files: [file], title: t.history.shareTitle(who) }).catch(() => {});
     return;
   }
   const url = URL.createObjectURL(file);
