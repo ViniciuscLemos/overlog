@@ -100,10 +100,10 @@ export async function startWorkout(routineId: number, partners: string[] = []) {
   });
 }
 
-export async function saveNote(workoutId: number, slot: number, note: string) {
-  const workout = await db.workouts.get(workoutId);
-  if (workout) await db.workouts.update(workoutId, { notes: { ...workout.notes, [slot]: note } });
-}
+export const saveNote = (workoutId: number, slot: number, note: string) =>
+  db.workouts.where('id').equals(workoutId).modify((w) => {
+    w.notes = { ...w.notes, [slot]: note };
+  });
 
 // the partners from the last workout together, to suggest the same name next time
 export async function lastPartners() {

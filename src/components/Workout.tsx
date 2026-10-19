@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useRef, useState } from 'react';
 import {
-  addSet, db, discardWorkout, exerciseHistory, finishWorkout, removeSet, updateSet, workoutSets, type LoggedSet,
+  addSet, db, discardWorkout, exerciseHistory, finishWorkout, removeSet, saveNote, updateSet, workoutSets, type LoggedSet,
 } from '../lib/db';
 import { displayName, imageUrl, loadExercises, type Exercise } from '../lib/exercises';
 import { restLabel } from '../lib/routines';
@@ -37,7 +37,8 @@ export function Workout({ id }: { id: number }) {
   const workout = useLiveQuery(() => db.workouts.get(id), [id]);
   const sets = useLiveQuery(() => workoutSets(id), [id]);
   const [byId, setById] = useState<Map<string, Exercise>>(new Map());
-  const [last, setLast] = useState<Map<string, LoggedSet[]>>(new Map());
+  const [last, setLast] = useState<Map<string, Last>>(new Map());
+  const [who, setWho] = useState<string | undefined>(undefined);
   const now = useNow(1000);
   useWakeLock();
 
@@ -46,12 +47,17 @@ export function Workout({ id }: { id: number }) {
   }, []);
 
   const planKey = workout?.plan.map((p) => p.exerciseId).join(',');
+  const partnersKey = workout?.partners?.join(',') ?? '';
   useEffect(() => {
     if (!planKey) return;
     const ids = [...new Set(planKey.split(','))];
-    Promise.all(ids.map(async (e) => [e, (await exerciseHistory(e, id))[0]?.sets ?? []] as const)).then((pairs) =>
-      setLast(new Map(pairs)));
-  }, [planKey, id]);
+    const people = [undefined, ...(partnersKey ? partnersKey.split(',') : [])];
+    const pairs = people.flatMap((person) => ids.map(async (e) => {
+      const session = (await exerciseHistory(e, id, person))[0];
+      return [lastKey(e, person), { sets: session?.sets ?? [], note: session?.note ?? '' }] as const;
+    }));
+    Promise.all(pairs).then((all) => setLast(new Map(all)));
+  }, [planKey, partnersKey, id]);
 
   useEffect(() => {
     if (workout) document.title = `${workout.name} · Overlog`;
@@ -64,6 +70,8 @@ export function Workout({ id }: { id: number }) {
   if (!workout) return <p className="muted">Esse treino não existe mais. <a href="#/treinos">Voltar</a></p>;
   if (workout.finishedAt) return <p className="muted">Esse treino já terminou. <a href={`#/historico/${id}`}>Ver resumo</a></p>;
 
+  const people = [undefined, ...(workout.partners ?? [])];
+  const nextPerson = () => setWho(people[(people.indexOf(who) + 1) % people.length]);
   const lastDone = sets.filter((s) => s.done).sort((a, b) => b.doneAt! - a.doneAt!)[0];
   const rest = lastDone ? workout.plan[lastDone.slot]?.restSeconds ?? 0 : 0;
   const restLeft = lastDone ? lastDone.doneAt! + rest * 1000 - now : 0;
@@ -101,14 +109,32 @@ export function Workout({ id }: { id: number }) {
           slot={slot}
           plan={plan}
           exercise={byId.get(plan.exerciseId)}
-          sets={sets.filter((s) => s.slot === slot)}
-          last={last.get(plan.exerciseId) ?? []}
+          who={who}
+          note={workout.notes?.[slot] ?? ''}
+          sets={sets.filter((s) => s.slot === slot && s.who === who)}
+          last={last.get(lastKey(plan.exerciseId, who)) ?? { sets: [], note: '' }}
+          onDone={people.length > 1 ? nextPerson : undefined}
         />
       ))}
 
       <button type="button" className="danger discard" onClick={discard}>Descartar treino</button>
 
       <div className="workout-bar">
+        {people.length > 1 && (
+          <div className="people" role="group" aria-label="Quem está anotando">
+            {people.map((person) => (
+              <button
+                key={person ?? ''}
+                type="button"
+                className={person === who ? 'chip on' : 'chip'}
+                aria-pressed={person === who}
+                onClick={() => setWho(person)}
+              >
+                {person ?? 'Eu'}
+              </button>
+            ))}
+          </div>
+        )}
         <span>
           {lastDone && restLeft > 0 ? (
             <>Descanso <strong>{clockLabel(restLeft)}</strong></>
@@ -124,16 +150,26 @@ export function Workout({ id }: { id: number }) {
   );
 }
 
+interface Last {
+  sets: LoggedSet[];
+  note: string;
+}
+
+const lastKey = (exerciseId: string, who?: string) => `${who ?? ''}|${exerciseId}`;
+
 interface BlockProps {
   workoutId: number;
   slot: number;
   plan: PlannedExercise;
   exercise: Exercise | undefined;
+  who: string | undefined;
+  note: string;
   sets: LoggedSet[];
-  last: LoggedSet[];
+  last: Last;
+  onDone?: () => void;
 }
 
-function ExerciseBlock({ workoutId, slot, plan, exercise, sets, last }: BlockProps) {
+function ExerciseBlock({ workoutId, slot, plan, exercise, who, note, sets, last: { sets: last, note: lastNote }, onDone }: BlockProps) {
   const bodyweight = exercise?.equipment === 'body only';
   const step = nextStep(last, plan, incrementFor(exercise?.equipment ?? ''));
   const stepWeight = step.kind === 'first' ? undefined : step.weightKg;
@@ -150,6 +186,7 @@ function ExerciseBlock({ workoutId, slot, plan, exercise, sets, last }: BlockPro
         {plan.note && ` · ${plan.note}`}
       </p>
       {last.length > 0 && <p className="last">Última vez: {last.map(formatSet).join(' · ')}</p>}
+      {lastNote && <p className="last">Anotação da última vez: {lastNote}</p>}
       <p className="step">{stepText(step, bodyweight)}</p>
 
       <div className="set-row set-head" aria-hidden="true">
@@ -169,16 +206,35 @@ function ExerciseBlock({ workoutId, slot, plan, exercise, sets, last }: BlockPro
             bodyweight={bodyweight}
             weightHint={before ?? stepWeight ?? last[i]?.weightKg ?? undefined}
             repsHint={last[i]?.reps ?? undefined}
+            onDone={onDone}
           />
         );
       })}
       <div className="set-actions">
-        <button type="button" className="secondary" onClick={() => addSet(workoutId, slot, plan.exerciseId)}>+ Série</button>
+        <button type="button" className="secondary" onClick={() => addSet(workoutId, slot, plan.exerciseId, who)}>+ Série</button>
         {removable && sets.length > 1 && (
           <button type="button" className="secondary" onClick={() => removeSet(removable.id!)}>− Série</button>
         )}
       </div>
+      <NoteInput workoutId={workoutId} slot={slot} note={note} />
     </div>
+  );
+}
+
+function NoteInput({ workoutId, slot, note }: { workoutId: number; slot: number; note: string }) {
+  const [text, setText] = useState(note);
+  return (
+    <input
+      className="note"
+      placeholder="Anotação de hoje (ombro incomodou, máquina diferente...)"
+      value={text}
+      onChange={(e) => {
+        setText(e.target.value);
+        saveNote(workoutId, slot, e.target.value);
+      }}
+      onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+      enterKeyHint="done"
+    />
   );
 }
 
@@ -188,11 +244,12 @@ interface RowProps {
   bodyweight: boolean;
   weightHint: number | undefined;
   repsHint: number | undefined;
+  onDone?: () => void;
 }
 
 const show = (n: number | null) => (n === null ? '' : formatKg(n));
 
-function SetRow({ index, set, bodyweight, weightHint, repsHint }: RowProps) {
+function SetRow({ index, set, bodyweight, weightHint, repsHint, onDone }: RowProps) {
   const [weight, setWeight] = useState(show(set.weightKg));
   const [reps, setReps] = useState(show(set.reps));
   const [rir, setRir] = useState(show(set.rir));
@@ -214,6 +271,7 @@ function SetRow({ index, set, bodyweight, weightHint, repsHint }: RowProps) {
     setWeight(show(w));
     setReps(show(r));
     await save({ weightKg: w, reps: Math.round(r), rir: parseNumber(rir), done: true, doneAt: Date.now() });
+    onDone?.();
   }
 
   return (
