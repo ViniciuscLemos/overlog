@@ -103,6 +103,9 @@ export function durationLabel(ms: number) {
   return `${Math.floor(minutes / 60)}h${String(minutes % 60).padStart(2, '0')}`;
 }
 
+export const dateLabel = (ms: number) =>
+  new Date(ms).toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
+
 export const clockLabel = (ms: number) => {
   const s = Math.max(0, Math.round(ms / 1000));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
