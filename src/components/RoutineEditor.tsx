@@ -52,6 +52,8 @@ export function RoutineEditor({ id }: { id: number }) {
         className="routine-name"
         value={draft.name}
         aria-label="Nome do treino"
+        enterKeyHint="done"
+        onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
         onChange={(e) => {
           setDraft({ ...draft, name: e.target.value });
           saveRoutine(id, { name: e.target.value });
