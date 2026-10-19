@@ -118,7 +118,7 @@ export default function App() {
           <a href="#/estudos" aria-current={studies ? 'page' : undefined}>Estudos</a>
         </nav>
       </header>
-      {active && !logging && (
+      {active && !logging && route !== 'treinos' && (
         <a className="in-progress" href={`#/treino/${active.id}`}>
           {active.name} em andamento · <u>voltar pro treino</u>
         </a>
