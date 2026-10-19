@@ -9,9 +9,10 @@ interface Props {
   onFilters: (f: Filters) => void;
   /** when set, tapping an exercise picks it (adding to a workout) instead of opening its page */
   onPick?: (exercise: Exercise) => void;
+  alreadyIn?: Set<string>;
 }
 
-export function Library({ filters, onFilters, onPick }: Props) {
+export function Library({ filters, onFilters, onPick, alreadyIn }: Props) {
   const [all, setAll] = useState<Exercise[] | null>(null);
   const [shown, setShown] = useState(PAGE);
 
@@ -107,6 +108,7 @@ export function Library({ filters, onFilters, onPick }: Props) {
                     {e.pt && <small>{e.en}</small>}
                     <em>
                       {EQUIPMENT[e.equipment]} · {e.primary.map((m) => MUSCLES[m] ?? m).join(', ')}
+                      {alreadyIn?.has(e.id) && ' · já está no treino'}
                     </em>
                   </span>
                 </a>

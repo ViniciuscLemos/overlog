@@ -1,3 +1,4 @@
+import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useState } from 'react';
 import { ExerciseDetail } from './components/ExerciseDetail';
 import { Library } from './components/Library';
@@ -61,6 +62,7 @@ export default function App() {
 
   // the "add to workout" search is its own, so it doesn't change the exercises tab
   const [pickFilters, setPickFilters] = useState<Filters>({ text: '', equipment: null, muscle: null });
+  const addingTo = useLiveQuery(() => (adding ? db.routines.get(Number(adding[1])) : undefined), [adding?.[1]]);
 
   async function addToRoutine(routineId: number, exerciseId: string) {
     const routine = await db.routines.get(routineId);
@@ -76,7 +78,12 @@ export default function App() {
       <>
         <a className="back" href={`#/treinos/${adding[1]}`}>‹ Voltar ao treino</a>
         <h2 className="pick-title">Adicionar exercício</h2>
-        <Library filters={pickFilters} onFilters={setPickFilters} onPick={(e) => addToRoutine(Number(adding[1]), e.id)} />
+        <Library
+          filters={pickFilters}
+          onFilters={setPickFilters}
+          onPick={(e) => addToRoutine(Number(adding[1]), e.id)}
+          alreadyIn={new Set(addingTo?.exercises.map((x) => x.exerciseId))}
+        />
       </>
     );
   } else if (editing) page = <RoutineEditor id={Number(editing[1])} />;
