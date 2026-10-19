@@ -155,7 +155,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 16px 40px; }
   color: var(--strong); font-size: 14px; text-decoration: none;
 }
 .in-progress u { text-underline-offset: 3px; }
-.workout { padding-bottom: 90px; }
+.workout { padding-bottom: 140px; }
 .workout h2 { margin: 18px 0 0; font-size: 26px; letter-spacing: -0.4px; }
 .block { padding: 16px 0 12px; border-bottom: 1px solid var(--line); }
 .target, .last, .step { margin: 6px 0 0; font-size: 14px; }
@@ -190,3 +190,10 @@ main { max-width: 680px; margin: 0 auto; padding: 0 16px 40px; }
 .chart { margin: 10px 0 4px; color: var(--strong); }
 .chart svg { display: block; width: 100%; height: auto; }
 .chart figcaption { color: var(--muted); font-size: 13px; margin-top: 4px; }
+.workout-bar { flex-wrap: wrap; }
+.people { display: flex; gap: 18px; width: 100%; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.block .note { margin-top: 12px; }
+.together { display: block; margin: 4px 0 10px; }
+.partner { margin-top: 26px; }
+.partner h3 { margin: 0 0 4px; font-size: 17px; }
+.partner .secondary { margin-top: 12px; }

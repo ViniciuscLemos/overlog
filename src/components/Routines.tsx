@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect } from 'react';
-import { activeWorkout, createRoutine, db, lastFinishedWorkout, moveRoutine, startWorkout } from '../lib/db';
+import { activeWorkout, createRoutine, db, lastFinishedWorkout, lastPartners, moveRoutine, startWorkout } from '../lib/db';
 import { nextInRotation, suggestName, totalSets } from '../lib/routines';
 import { dateLabel } from '../lib/workouts';
 import { Backup } from './Backup';
@@ -23,8 +23,14 @@ export function Routines() {
     window.location.hash = `#/treinos/${id}`;
   }
 
-  async function start(routineId: number) {
-    window.location.hash = `#/treino/${await startWorkout(routineId)}`;
+  async function start(routineId: number, partners: string[] = []) {
+    window.location.hash = `#/treino/${await startWorkout(routineId, partners)}`;
+  }
+
+  // same phone, one person after the other; each one's sets stay apart
+  async function startTogether(routineId: number) {
+    const name = window.prompt('Nome de quem vai treinar com você', (await lastPartners())[0] ?? '');
+    if (name?.trim()) await start(routineId, [name.trim()]);
   }
 
   if (!routines) return null;
@@ -41,7 +47,12 @@ export function Routines() {
         <a className="primary as-button" href={`#/treino/${active.id}`}>Continuar {active.name}</a>
       ) : (
         next && next.exercises.length > 0 && (
-          <button type="button" className="primary" onClick={() => start(next.id!)}>Começar {next.name}</button>
+          <>
+            <button type="button" className="primary" onClick={() => start(next.id!)}>Começar {next.name}</button>
+            <button type="button" className="secondary together" onClick={() => startTogether(next.id!)}>
+              Treinar em dupla
+            </button>
+          </>
         )
       )}
       {last && (

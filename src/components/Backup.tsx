@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { backupFileName, makeBackup, parseBackup, restoreBackup } from '../lib/backup';
+import { backupFileName, importShared, isSharedWorkout, makeBackup, parseBackup, restoreBackup } from '../lib/backup';
+import { dateLabel } from '../lib/workouts';
 
 export function Backup({ routineCount }: { routineCount: number }) {
   const input = useRef<HTMLInputElement>(null);
@@ -23,7 +24,22 @@ export function Backup({ routineCount }: { routineCount: number }) {
 
   async function restore(file: File) {
     try {
-      const backup = parseBackup(await file.text());
+      const text = await file.text();
+      const data = (() => {
+        try {
+          return JSON.parse(text);
+        } catch {
+          return null;
+        }
+      })();
+      if (isSharedWorkout(data)) {
+        const when = dateLabel(data.workout.startedAt);
+        if (!window.confirm(`Adicionar o ${data.workout.name} de ${when} ao seu histórico?`)) return;
+        const id = await importShared(data);
+        window.location.hash = `#/historico/${id}`;
+        return;
+      }
+      const backup = parseBackup(text);
       const count = backup.routines.length;
       const replace = routineCount > 0 ? ` Os ${routineCount} treinos de agora vão ser trocados pelos do arquivo.` : '';
       if (!window.confirm(`Restaurar ${count} ${count === 1 ? 'treino' : 'treinos'}?${replace}`)) return;
@@ -38,11 +54,12 @@ export function Backup({ routineCount }: { routineCount: number }) {
     <div className="backup">
       <p className="muted">
         Tudo fica só nesse celular. Salva um backup de vez em quando, pra não perder se trocar de celular ou limpar o
-        navegador.
+        navegador. Treinou em dupla? O arquivo que seu parceiro mandou entra em Importar treino.
       </p>
       <div className="editor-actions">
         <button type="button" className="secondary" onClick={save}>Salvar backup</button>
         <button type="button" className="secondary" onClick={() => input.current?.click()}>Restaurar backup</button>
+        <button type="button" className="secondary" onClick={() => input.current?.click()}>Importar treino</button>
       </div>
       <input
         ref={input}
