@@ -32,6 +32,7 @@ export function ExerciseDetail({ id }: { id: string }) {
   if (exercise === null) return <p className="muted">Esse exercício não existe. <a href="#/">Voltar</a></p>;
 
   const muscles = (list: string[]) => list.map((m) => MUSCLES[m] ?? m).join(', ');
+  const inRoutines = (routines ?? []).filter((r) => r.exercises.some((e) => e.exerciseId === exercise.id));
 
   return (
     <article className="detail">
@@ -95,6 +96,19 @@ export function ExerciseDetail({ id }: { id: string }) {
           <>
             <dt>Tipo</dt>
             <dd>{MECHANICS[exercise.mechanic]}</dd>
+          </>
+        )}
+        {inRoutines.length > 0 && (
+          <>
+            <dt>Nos treinos</dt>
+            <dd>
+              {inRoutines.map((r, i) => (
+                <span key={r.id}>
+                  {i > 0 && ', '}
+                  <a href={`#/treinos/${r.id}`}>{r.name}</a>
+                </span>
+              ))}
+            </dd>
           </>
         )}
       </dl>
