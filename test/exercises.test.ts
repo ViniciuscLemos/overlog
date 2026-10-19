@@ -33,6 +33,12 @@ describe('search', () => {
     expect(found.map((e) => e.id)).toContain('smith-machine-reverse-calf-raises');
   });
 
+  it('a synonym has to start a word: "remada" is row, not narrow', () => {
+    const found = search(all, { ...none, text: 'remada' });
+    expect(found.length).toBeGreaterThan(5);
+    expect(found.filter((e) => normalize(e.en).includes('narrow') && !/\brows?\b/.test(normalize(e.en)))).toEqual([]);
+  });
+
   it('filters by equipment and muscle', () => {
     const found = search(all, { ...none, equipment: 'cable', muscle: 'triceps' });
     expect(found.length).toBeGreaterThan(3);

@@ -50,8 +50,9 @@ export const SYNONYMS: Record<string, string[]> = {
   encolhimento: ['shrug'], crucifixo: ['fly', 'flys'], triceps: ['tricep'], biceps: ['bicep'],
 };
 
+// synonyms only count at the start of a word, or "remada" (row) finds "narrow stance squat"
 const matches = (haystack: string, word: string) =>
-  haystack.includes(word) || (SYNONYMS[word] ?? []).some((s) => haystack.includes(s));
+  haystack.includes(word) || (SYNONYMS[word] ?? []).some((s) => ` ${haystack}`.includes(` ${s}`));
 
 export function search(all: Exercise[], filters: Filters): Exercise[] {
   const words = normalize(filters.text).split(' ').filter(Boolean);
