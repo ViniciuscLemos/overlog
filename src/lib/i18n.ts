@@ -189,6 +189,25 @@ const pt = {
     partner: 'parceiro de treino',
   },
 
+  settings: {
+    title: 'Configurações',
+    language: 'Idioma',
+    rpg: 'Modo RPG',
+    on: 'Ligado',
+    off: 'Desligado',
+    rpgText: 'XP, nível, avatar e cenários pra deixar o treino mais divertido. É só visual: desligar não esconde nem muda nada dos seus treinos e do histórico.',
+    link: 'Configurações',
+  },
+
+  records: {
+    title: 'Recordes',
+    heaviest: 'Maior carga',
+    best: 'Melhor série',
+    bestHint: 'pela carga máxima estimada',
+    reps: 'Mais reps',
+    pr: 'recorde',
+  },
+
   studies: {
     title: 'Estudos',
     intro: 'Os estudos que eu uso de base pro app, resumidos. Cada um tem o link pro artigo, se quiser ler inteiro.',
@@ -354,6 +373,25 @@ const en: typeof pt = {
     already: 'This workout is already in your history.',
     gone: "This workout doesn't exist anymore.",
     partner: 'training partner',
+  },
+
+  settings: {
+    title: 'Settings',
+    language: 'Language',
+    rpg: 'RPG mode',
+    on: 'On',
+    off: 'Off',
+    rpgText: "XP, levels, an avatar and backgrounds to make training more fun. It's only cosmetic: turning it off doesn't hide or change anything in your workouts or history.",
+    link: 'Settings',
+  },
+
+  records: {
+    title: 'Records',
+    heaviest: 'Heaviest',
+    best: 'Best set',
+    bestHint: 'by estimated max',
+    reps: 'Most reps',
+    pr: 'record',
   },
 
   studies: {

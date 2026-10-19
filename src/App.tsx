@@ -5,6 +5,7 @@ import { History, WorkoutSummary } from './components/History';
 import { Library } from './components/Library';
 import { RoutineEditor } from './components/RoutineEditor';
 import { Routines } from './components/Routines';
+import { Settings } from './components/Settings';
 import { Studies } from './components/Studies';
 import { Workout } from './components/Workout';
 import { activeWorkout, db, saveRoutine } from './lib/db';
@@ -56,6 +57,7 @@ export default function App() {
   }, [filters]);
   const exercise = route.match(/^exercicio\/(.+)$/);
   const studies = route === 'estudos';
+  const settings = route === 'ajustes';
   const editing = route.match(/^treinos\/(\d+)$/);
   const adding = route.match(/^treinos\/(\d+)\/adicionar$/);
   const logging = route.match(/^treino\/(\d+)$/);
@@ -77,6 +79,7 @@ export default function App() {
 
   let page;
   if (studies) page = <Studies />;
+  else if (settings) page = <Settings />;
   else if (adding) {
     page = (
       <>
@@ -114,7 +117,7 @@ export default function App() {
           Overlog
         </a>
         <nav>
-          <a href="#/" aria-current={exercise || studies || routines ? undefined : 'page'}>{t.nav.exercises}</a>
+          <a href="#/" aria-current={exercise || studies || routines || settings ? undefined : 'page'}>{t.nav.exercises}</a>
           <a href="#/treinos" aria-current={routines ? 'page' : undefined}>{t.nav.workouts}</a>
           <a href="#/estudos" aria-current={studies ? 'page' : undefined}>{t.nav.studies}</a>
         </nav>
@@ -130,6 +133,7 @@ export default function App() {
       <footer className="credits">
         {t.credits.drawings} <a href="https://github.com/everkinetic/data">Everkinetic</a> (CC BY-SA 4.0).{' '}
         {t.credits.code} <a href="https://github.com/ViniciuscLemos/overlog">GitHub</a>.{' '}
+        <a href="#/ajustes">{t.settings.link}</a> ·{' '}
         <button type="button" className="clear" onClick={() => setLang(lang === 'pt' ? 'en' : 'pt')}>
           {t.credits.other}
         </button>

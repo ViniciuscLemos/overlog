@@ -197,3 +197,6 @@ main { max-width: 680px; margin: 0 auto; padding: 0 16px 40px; }
 .partner { margin-top: 26px; }
 .partner h3 { margin: 0 0 4px; font-size: 17px; }
 .partner .secondary { margin-top: 12px; }
+.settings h3 { margin: 24px 0 4px; font-size: 17px; }
+.toggle { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
+.toggle input { width: 22px; height: 22px; accent-color: var(--strong); }
