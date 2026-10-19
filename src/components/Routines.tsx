@@ -26,8 +26,8 @@ export function Routines() {
     <section className="routines">
       <h2>Treinos</h2>
       <p className="intro">
-        Quantos você quiser, na ordem em que você faz. Eles giram: depois do último, volta pro primeiro, sem prender
-        cada treino a um dia da semana.
+        Monta quantos quiser, na ordem que você faz. Depois do último volta pro primeiro, não fica preso a dia da
+        semana.
       </p>
 
       <ol className="rotation">
@@ -59,8 +59,7 @@ export function Routines() {
 
       {routines.length === 0 && (
         <p className="muted">
-          Nenhum treino ainda. Cria um pra cada dia da sua divisão (Upper 1, Lower 1, Upper 2...) e coloca na ordem em
-          que você faz.
+          Nenhum treino ainda. Cria um pra cada dia da sua divisão (Upper 1, Lower 1...).
         </p>
       )}
       <button type="button" className="more" onClick={newRoutine}>

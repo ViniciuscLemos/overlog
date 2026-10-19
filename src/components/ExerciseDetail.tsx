@@ -100,7 +100,7 @@ export function ExerciseDetail({ id }: { id: string }) {
       </dl>
 
       <h3>Como fazer</h3>
-      <p className="muted">O passo a passo ainda está em inglês; a tradução vem aos poucos.</p>
+      <p className="muted">O passo a passo ainda tá em inglês, vou traduzindo aos poucos.</p>
       <ol className="steps" lang="en">
         {exercise.steps.map((step) => (
           <li key={step}>{step}</li>
