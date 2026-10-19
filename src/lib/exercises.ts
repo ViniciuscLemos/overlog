@@ -1,3 +1,5 @@
+import { lang } from './i18n';
+
 export interface Exercise {
   id: string;
   en: string;
@@ -21,7 +23,7 @@ export const IMAGE_BASE = 'https://raw.githubusercontent.com/everkinetic/data/ma
 
 export const imageUrl = (path: string) => IMAGE_BASE + path;
 
-export const displayName = (e: Exercise) => e.pt ?? e.en;
+export const displayName = (e: Exercise) => (lang === 'en' ? e.en : e.pt ?? e.en);
 
 export function normalize(text: string) {
   return text

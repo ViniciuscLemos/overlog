@@ -1,3 +1,5 @@
+import { t } from './i18n';
+
 export interface RoutineExercise {
   exerciseId: string;
   sets: number;
@@ -67,10 +69,10 @@ export function nextInRotation<T extends { id?: number; position: number }>(rout
 
 export function suggestName(taken: string[]) {
   for (let i = 0; i < 26; i++) {
-    const name = `Treino ${String.fromCharCode(65 + i)}`;
+    const name = t.routines.suggested(String.fromCharCode(65 + i));
     if (!taken.includes(name)) return name;
   }
-  return `Treino ${taken.length + 1}`;
+  return t.routines.suggested(String(taken.length + 1));
 }
 
 export const restLabel = (seconds: number) =>

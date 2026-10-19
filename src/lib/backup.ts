@@ -1,4 +1,5 @@
 import { db, type LoggedSet, type Routine, type Workout } from './db';
+import { t } from './i18n';
 import { DEFAULTS, tidy } from './routines';
 
 export interface Backup {
@@ -32,20 +33,20 @@ export function parseBackup(text: string): Backup {
   try {
     data = JSON.parse(text);
   } catch {
-    throw new Error('Esse arquivo não é um backup do Overlog.');
+    throw new Error(t.backup.notBackup);
   }
   if (!isObject(data) || data.app !== 'overlog' || !Array.isArray(data.routines)) {
-    throw new Error('Esse arquivo não é um backup do Overlog.');
+    throw new Error(t.backup.notBackup);
   }
   if (typeof data.version !== 'number' || data.version > 1) {
-    throw new Error('Esse backup é de uma versão mais nova do app. Atualiza a página e tenta de novo.');
+    throw new Error(t.backup.newer);
   }
 
   const routines = data.routines.filter(isObject).map((r, i): Routine => {
     const exercises = Array.isArray(r.exercises) ? r.exercises.filter(isObject) : [];
     return {
       id: typeof r.id === 'number' ? r.id : undefined,
-      name: typeof r.name === 'string' && r.name.trim() ? r.name : 'Treino',
+      name: typeof r.name === 'string' && r.name.trim() ? r.name : t.routines.defaultName,
       position: typeof r.position === 'number' ? r.position : i,
       exercises: exercises
         .filter((e) => typeof e.exerciseId === 'string')
@@ -75,9 +76,9 @@ export interface SharedWorkout {
   sets: Omit<LoggedSet, 'id' | 'workoutId' | 'who'>[];
 }
 
-export async function partnerShare(workoutId: number, who: string, from = 'parceiro de treino'): Promise<SharedWorkout> {
+export async function partnerShare(workoutId: number, who: string, from = t.backup.partner): Promise<SharedWorkout> {
   const workout = await db.workouts.get(workoutId);
-  if (!workout) throw new Error('Esse treino não existe mais.');
+  if (!workout) throw new Error(t.backup.gone);
   const sets = await db.sets.where('workoutId').equals(workoutId).filter((s) => s.who === who && s.done).sortBy('id');
   const { name, plan, startedAt, finishedAt, notes } = workout;
   return {
@@ -101,7 +102,7 @@ export async function importShared(shared: SharedWorkout) {
   return db.transaction('rw', db.workouts, db.sets, async () => {
     const { name, plan, startedAt, finishedAt, notes } = shared.workout;
     const same = await db.workouts.where('startedAt').equals(startedAt).filter((w) => w.name === name).first();
-    if (same) throw new Error('Esse treino já está no seu histórico.');
+    if (same) throw new Error(t.backup.already);
     const workoutId = (await db.workouts.add({
       routineId: null, name, plan: Array.isArray(plan) ? plan : [], startedAt, finishedAt: finishedAt ?? startedAt,
       ...(notes ? { notes } : {}),

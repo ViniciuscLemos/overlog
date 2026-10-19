@@ -1,4 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie';
+import { t } from './i18n';
 import type { Routine } from './routines';
 import type { PlannedExercise } from './workouts';
 
@@ -69,7 +70,7 @@ export const deleteRoutine = (id: number) => db.routines.delete(id);
 export async function duplicateRoutine(id: number) {
   const source = await db.routines.get(id);
   if (!source) return undefined;
-  const copyId = (await createRoutine(`${source.name} (cópia)`)) as number;
+  const copyId = (await createRoutine(t.routines.copy(source.name))) as number;
   await saveRoutine(copyId, { exercises: source.exercises.map((e) => ({ ...e })) });
   return copyId;
 }
@@ -89,7 +90,7 @@ export async function startWorkout(routineId: number, partners: string[] = []) {
     const open = await activeWorkout();
     if (open) return open.id!;
     const routine = await db.routines.get(routineId);
-    if (!routine) throw new Error('Esse treino não existe mais.');
+    if (!routine) throw new Error(t.backup.gone);
     const plan = routine.exercises.map((e) => ({ ...e }));
     const workoutId = (await db.workouts.add({
       routineId, name: routine.name, plan, startedAt: Date.now(), finishedAt: null, ...(partners.length ? { partners } : {}),

@@ -1,4 +1,5 @@
 // Logging a workout and what to do next time. No database in here, so it's all tested on its own.
+import { lang, locale, t } from './i18n';
 
 export interface PlannedExercise {
   exerciseId: string;
@@ -22,7 +23,10 @@ export function parseNumber(text: string): number | null {
   return text.trim() === '' || !Number.isFinite(n) || n < 0 ? null : n;
 }
 
-export const formatKg = (kg: number) => String(Math.round(kg * 100) / 100).replace('.', ',');
+export const formatKg = (kg: number) => {
+  const text = String(Math.round(kg * 100) / 100);
+  return lang === 'pt' ? text.replace('.', ',') : text;
+};
 
 export const formatSet = (s: Pick<SetLike, 'weightKg' | 'reps' | 'rir'>) => {
   const weight = s.weightKg ? `${formatKg(s.weightKg)} kg × ` : '';
@@ -65,20 +69,20 @@ export function nextStep(last: SetLike[], target: { repMin: number; repMax: numb
 }
 
 export function stepText(step: Step, bodyweight: boolean) {
-  const kg = (n: number) => (bodyweight && n === 0 ? 'peso do corpo' : `${formatKg(n)} kg`);
+  const kg = (n: number) => (bodyweight && n === 0 ? t.step.bodyweight : `${formatKg(n)} kg`);
   switch (step.kind) {
     case 'first':
-      return 'Primeira vez: escolhe uma carga que deixe 1 ou 2 reps sobrando.';
+      return t.step.first;
     case 'up':
       return bodyweight && step.from === 0
-        ? 'Bateu o topo da faixa em todas: pode pôr carga extra ou subir a faixa de reps.'
-        : `Bateu o topo da faixa em todas: sobe pra ${kg(step.weightKg)}.`;
+        ? t.step.upBodyweight
+        : t.step.up(kg(step.weightKg));
     case 'reps':
-      return `Mantém ${kg(step.weightKg)} e tenta mais 1 rep.`;
+      return t.step.reps(kg(step.weightKg));
     case 'down':
-      return `Ficou abaixo da faixa indo até a falha: baixa pra ${kg(step.weightKg)}.`;
+      return t.step.down(kg(step.weightKg));
     case 'closer':
-      return `Sobraram 3 ou mais reps: mantém ${kg(step.weightKg)} e chega mais perto da falha.`;
+      return t.step.closer(kg(step.weightKg));
   }
 }
 
@@ -104,7 +108,7 @@ export function durationLabel(ms: number) {
 }
 
 export const dateLabel = (ms: number) =>
-  new Date(ms).toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
+  new Date(ms).toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' });
 
 export const clockLabel = (ms: number) => {
   const s = Math.max(0, Math.round(ms / 1000));
