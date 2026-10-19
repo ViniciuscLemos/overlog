@@ -7,7 +7,7 @@ import { displayName, imageUrl, loadExercises, type Exercise } from '../lib/exer
 import { t } from '../lib/i18n';
 import { restLabel } from '../lib/routines';
 import {
-  clockLabel, durationLabel, formatKg, formatSet, incrementFor, nextStep, parseNumber, stepText, type PlannedExercise,
+  clockLabel, durationLabel, formatKg, formatSet, incrementFor, isRecord, nextStep, parseNumber, records, stepText, type PlannedExercise,
 } from '../lib/workouts';
 
 function useNow(ms: number) {
@@ -54,8 +54,9 @@ export function Workout({ id }: { id: number }) {
     const ids = [...new Set(planKey.split(','))];
     const people = [undefined, ...(partnersKey ? partnersKey.split(',') : [])];
     const pairs = people.flatMap((person) => ids.map(async (e) => {
-      const session = (await exerciseHistory(e, id, person))[0];
-      return [lastKey(e, person), { sets: session?.sets ?? [], note: session?.note ?? '' }] as const;
+      const sessions = await exerciseHistory(e, id, person);
+      const best = records(sessions.flatMap((x) => x.sets)).best;
+      return [lastKey(e, person), { sets: sessions[0]?.sets ?? [], note: sessions[0]?.note ?? '', best }] as const;
     }));
     Promise.all(pairs).then((all) => setLast(new Map(all)));
   }, [planKey, partnersKey, id]);
@@ -113,7 +114,7 @@ export function Workout({ id }: { id: number }) {
           who={who}
           note={workout.notes?.[slot] ?? ''}
           sets={sets.filter((s) => s.slot === slot && s.who === who)}
-          last={last.get(lastKey(plan.exerciseId, who)) ?? { sets: [], note: '' }}
+          last={last.get(lastKey(plan.exerciseId, who)) ?? { sets: [], note: '', best: null }}
           onDone={people.length > 1 ? nextPerson : undefined}
         />
       ))}
@@ -154,6 +155,7 @@ export function Workout({ id }: { id: number }) {
 interface Last {
   sets: LoggedSet[];
   note: string;
+  best: LoggedSet | null;
 }
 
 const lastKey = (exerciseId: string, who?: string) => `${who ?? ''}|${exerciseId}`;
@@ -170,7 +172,7 @@ interface BlockProps {
   onDone?: () => void;
 }
 
-function ExerciseBlock({ workoutId, slot, plan, exercise, who, note, sets, last: { sets: last, note: lastNote }, onDone }: BlockProps) {
+function ExerciseBlock({ workoutId, slot, plan, exercise, who, note, sets, last: { sets: last, note: lastNote, best }, onDone }: BlockProps) {
   const bodyweight = exercise?.equipment === 'body only';
   const step = nextStep(last, plan, incrementFor(exercise?.equipment ?? ''));
   const stepWeight = step.kind === 'first' ? undefined : step.weightKg;
@@ -207,6 +209,7 @@ function ExerciseBlock({ workoutId, slot, plan, exercise, who, note, sets, last:
             bodyweight={bodyweight}
             weightHint={before ?? stepWeight ?? last[i]?.weightKg ?? undefined}
             repsHint={last[i]?.reps ?? undefined}
+            record={isRecord(set, best)}
             onDone={onDone}
           />
         );
@@ -245,12 +248,13 @@ interface RowProps {
   bodyweight: boolean;
   weightHint: number | undefined;
   repsHint: number | undefined;
+  record: boolean;
   onDone?: () => void;
 }
 
 const show = (n: number | null) => (n === null ? '' : formatKg(n));
 
-function SetRow({ index, set, bodyweight, weightHint, repsHint, onDone }: RowProps) {
+function SetRow({ index, set, bodyweight, weightHint, repsHint, record, onDone }: RowProps) {
   const [weight, setWeight] = useState(show(set.weightKg));
   const [reps, setReps] = useState(show(set.reps));
   const [rir, setRir] = useState(show(set.rir));
@@ -277,7 +281,7 @@ function SetRow({ index, set, bodyweight, weightHint, repsHint, onDone }: RowPro
 
   return (
     <div className={set.done ? 'set-row done' : 'set-row'}>
-      <span>{index + 1}</span>
+      <span>{record ? <abbr className="pr" title={t.records.pr}>PR</abbr> : index + 1}</span>
       <input
         ref={weightInput}
         inputMode="decimal"

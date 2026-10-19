@@ -28,7 +28,7 @@ You start the next workout in the rotation and each exercise shows what you did 
 
 An empty field takes last time's number when you tick the set, so repeating it is one tap. Everything saves as you go, so closing the app in the middle of a workout is fine. There's a rest countdown at the bottom (based on the clock, not a timer that iOS can pause) and the screen stays on.
 
-After that there's a history of every workout, and each exercise gets a chart of its best set per session. That uses an estimated max so 80 kg x 9 and 82 kg x 7 can be compared.
+After that there's a history of every workout, and each exercise gets a chart of its best set per session. That uses an estimated max so 80 kg x 9 and 82 kg x 7 can be compared. The same page shows the records (heaviest set, best set, most reps), and a set that beats the record gets a PR mark while you log it.
 
 Each exercise also takes a note for the day ("shoulder felt off", "machine 2 was taken") that shows up next time you do it.
 

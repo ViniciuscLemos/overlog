@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { exerciseHistory } from '../lib/db';
 import { t } from '../lib/i18n';
-import { dateLabel, estimatedMax, formatKg, formatSet } from '../lib/workouts';
+import { dateLabel, formatKg, formatSet, records, setEstimate } from '../lib/workouts';
 
 const W = 320;
 const H = 120;
@@ -42,12 +42,40 @@ export function ExerciseHistory({ exerciseId }: { exerciseId: string }) {
     .slice(-12)
     .map((s) => ({
       date: s.date,
-      value: Math.max(...s.sets.map((set) => estimatedMax(set.weightKg ?? 0, set.reps ?? 0, set.rir ?? 0))),
+      value: Math.max(...s.sets.map(setEstimate)),
     }));
   const weighted = points.some((p) => p.value > 0);
+  const best = records(sessions.flatMap((s) => s.sets));
 
   return (
     <>
+      <h3 className="similar-title">{t.records.title}</h3>
+      <dl className="facts records">
+        {weighted && best.heaviest && (
+          <>
+            <dt>{t.records.heaviest}</dt>
+            <dd>{formatSet({ ...best.heaviest, rir: null })}</dd>
+          </>
+        )}
+        {weighted && best.best && (
+          <>
+            <dt>{t.records.best}</dt>
+            <dd>
+              {formatSet({ ...best.best, rir: null })}{' '}
+              <span className="muted">
+                ({t.records.bestHint}: {formatKg(Math.round(setEstimate(best.best)))} kg)
+              </span>
+            </dd>
+          </>
+        )}
+        {best.mostReps && (
+          <>
+            <dt>{t.records.reps}</dt>
+            <dd>{formatSet({ ...best.mostReps, rir: null })}</dd>
+          </>
+        )}
+      </dl>
+
       <h3 className="similar-title">{t.exercise.history}</h3>
       {weighted && points.length > 1 && <Chart points={points} />}
       <ul className="list">

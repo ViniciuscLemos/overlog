@@ -117,3 +117,29 @@ export const clockLabel = (ms: number) => {
 
 // Epley; only to compare sessions of the same exercise on the chart, not a real max
 export const estimatedMax = (weightKg: number, reps: number, rir = 0) => weightKg * (1 + (reps + rir) / 30);
+
+// what was lifted, not what was left in the tank: 82 x 8 beats 80 x 8 even if that one had a rep to spare
+export const setEstimate = (s: Pick<SetLike, 'weightKg' | 'reps'>) => estimatedMax(s.weightKg ?? 0, s.reps ?? 0);
+const estimate = setEstimate;
+
+export interface Records<T extends SetLike = SetLike> {
+  heaviest: T | null;
+  best: T | null; // by estimated max, so 80 x 9 can beat 82 x 6
+  mostReps: T | null;
+}
+
+// from the sets actually done, the source for anything that counts as a record
+export function records<T extends SetLike>(sets: T[]): Records<T> {
+  const done = sets.filter((s) => s.done && s.reps);
+  const top = (score: (s: T) => number) =>
+    done.reduce<T | null>((best, s) => (best === null || score(s) > score(best) ? s : best), null);
+  return {
+    heaviest: top((s) => (s.weightKg ?? 0) * 1000 + (s.reps ?? 0)),
+    best: top(estimate),
+    mostReps: top((s) => (s.reps ?? 0) * 1000 + (s.weightKg ?? 0)),
+  };
+}
+
+// a set beats the record only by more than rounding, and only if there was a record to beat
+export const isRecord = (set: SetLike, previous: SetLike | null) =>
+  !!previous && set.done && !!set.reps && estimate(set) > estimate(previous) + 0.01;

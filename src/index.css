@@ -200,3 +200,5 @@ main { max-width: 680px; margin: 0 auto; padding: 0 16px 40px; }
 .settings h3 { margin: 24px 0 4px; font-size: 17px; }
 .toggle { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
 .toggle input { width: 22px; height: 22px; accent-color: var(--strong); }
+.pr { color: #000; background: var(--strong); font-size: 11px; font-weight: 800; padding: 1px 4px; text-decoration: none; }
+.records { margin-bottom: 0; }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
-  clockLabel, durationLabel, estimatedMax, formatKg, formatSet, incrementFor, nextStep, parseNumber, stepText, summarize,
+  clockLabel, durationLabel, estimatedMax, formatKg, formatSet, incrementFor, isRecord, nextStep, parseNumber, records, stepText,
+  summarize,
 } from '../src/lib/workouts';
 
 const set = (weightKg: number | null, reps: number | null, rir: number | null = 1, done = true) => ({ weightKg, reps, rir, done });
@@ -82,5 +83,26 @@ describe('summary', () => {
   it('estimated max goes up with weight and with reps', () => {
     expect(estimatedMax(100, 8)).toBeGreaterThan(estimatedMax(100, 6));
     expect(estimatedMax(102, 6)).toBeGreaterThan(estimatedMax(100, 6));
+  });
+});
+
+describe('records', () => {
+  it('heaviest, best estimated set and most reps come from done sets only', () => {
+    const sets = [set(80, 9, 0), set(82, 6, 0), set(60, 15, 0), set(100, 3, 0, false)];
+    const r = records(sets);
+    expect(r.heaviest).toMatchObject({ weightKg: 82, reps: 6 });
+    expect(r.best).toMatchObject({ weightKg: 80, reps: 9 });
+    expect(r.mostReps).toMatchObject({ weightKg: 60, reps: 15 });
+  });
+
+  it('nothing done, no records', () => {
+    expect(records([])).toEqual({ heaviest: null, best: null, mostReps: null });
+  });
+
+  it('a set is a record only when it beats an existing one', () => {
+    expect(isRecord(set(82, 9), set(80, 9))).toBe(true);
+    expect(isRecord(set(80, 9), set(80, 9))).toBe(false);
+    expect(isRecord(set(80, 9), null)).toBe(false);
+    expect(isRecord(set(90, 9, 1, false), set(80, 9))).toBe(false);
   });
 });
