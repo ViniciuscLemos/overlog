@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useState } from 'react';
-import { db, deleteRoutine, duplicateRoutine, saveRoutine } from '../lib/db';
+import { db, deleteRoutine, duplicateRoutine, saveRoutine, startWorkout } from '../lib/db';
 import { displayName, imageUrl, loadExercises, type Exercise } from '../lib/exercises';
 import { MUSCLES } from '../lib/labels';
 import { LIMITS, move, removeAt, restLabel, setsPerMuscle, tidy, totalSets, type Routine, type RoutineExercise } from '../lib/routines';
@@ -155,6 +155,17 @@ export function RoutineEditor({ id }: { id: number }) {
             .map(([muscle, sets]) => `${MUSCLES[muscle] ?? muscle} ${sets}`)
             .join(' · ')}
         </p>
+      )}
+      {draft.exercises.length > 0 && (
+        <button
+          type="button"
+          className="primary start"
+          onClick={async () => {
+            window.location.hash = `#/treino/${await startWorkout(id)}`;
+          }}
+        >
+          Começar esse treino
+        </button>
       )}
       <div className="editor-actions">
         <button

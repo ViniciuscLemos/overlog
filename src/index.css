@@ -142,3 +142,48 @@ main { max-width: 680px; margin: 0 auto; padding: 0 16px 40px; }
 .credits { max-width: 680px; margin: 0 auto; color: var(--muted); font-size: 12px; padding: 0 16px 32px; }
 
 :focus-visible { outline: 2px solid var(--strong); outline-offset: 2px; }
+
+/* logging a workout */
+.primary {
+  display: block; width: 100%; min-height: 48px; margin: 14px 0 6px; border: 0; background: var(--strong); color: #000;
+  font: inherit; font-weight: 700; text-align: center; line-height: 48px; text-decoration: none; cursor: pointer;
+}
+.primary:active { background: #cfcfcf; }
+.start { margin-top: 22px; }
+.in-progress {
+  display: block; max-width: 680px; margin: 0 auto; padding: 8px 16px; border-bottom: 1px solid var(--line);
+  color: var(--strong); font-size: 14px; text-decoration: none;
+}
+.in-progress u { text-underline-offset: 3px; }
+.workout { padding-bottom: 90px; }
+.workout h2 { margin: 18px 0 0; font-size: 26px; letter-spacing: -0.4px; }
+.block { padding: 16px 0 12px; border-bottom: 1px solid var(--line); }
+.target, .last, .step { margin: 6px 0 0; font-size: 14px; }
+.target, .last { color: var(--muted); }
+.step { color: var(--strong); }
+.set-row { display: grid; grid-template-columns: 24px 1fr 1fr 1fr 48px; gap: 10px; align-items: center; margin-top: 4px; }
+.set-row > span:first-child { color: var(--muted); font-size: 14px; }
+.set-head { margin-top: 12px; color: var(--muted); font-size: 12px; }
+.set-row input {
+  min-width: 0; min-height: 44px; border: 0; border-bottom: 1px solid var(--line); background: none; color: var(--text);
+  font: inherit; font-size: 17px; padding: 0 2px;
+}
+.set-row input:focus { outline: none; border-bottom-color: var(--strong); }
+.set-row input::placeholder { color: #555; }
+.tick {
+  height: 40px; border: 1px solid var(--line); background: none; color: var(--muted); font: inherit; font-size: 18px; cursor: pointer;
+}
+.done .tick { background: var(--strong); border-color: var(--strong); color: #000; }
+.done input { color: var(--strong); font-weight: 650; }
+.set-actions { display: flex; gap: 22px; margin-top: 12px; }
+.discard { display: block; margin: 28px 0 0; }
+.workout-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  max-width: 680px; margin: 0 auto; padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: var(--bg); border-top: 1px solid var(--line); font-size: 15px;
+}
+.workout-bar strong { font-variant-numeric: tabular-nums; font-size: 17px; }
+.workout-bar .primary { width: auto; margin: 0; padding: 0 22px; }
+.summary { margin-top: 14px; }
+.slot .last { margin-top: 4px; }

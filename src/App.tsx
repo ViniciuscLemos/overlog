@@ -1,11 +1,13 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useState } from 'react';
 import { ExerciseDetail } from './components/ExerciseDetail';
+import { History, WorkoutSummary } from './components/History';
 import { Library } from './components/Library';
 import { RoutineEditor } from './components/RoutineEditor';
 import { Routines } from './components/Routines';
 import { Studies } from './components/Studies';
-import { db, saveRoutine } from './lib/db';
+import { Workout } from './components/Workout';
+import { activeWorkout, db, saveRoutine } from './lib/db';
 import { addExercise } from './lib/routines';
 import type { Filters } from './lib/exercises';
 
@@ -55,7 +57,11 @@ export default function App() {
   const studies = route === 'estudos';
   const editing = route.match(/^treinos\/(\d+)$/);
   const adding = route.match(/^treinos\/(\d+)\/adicionar$/);
-  const routines = route === 'treinos' || editing || adding;
+  const logging = route.match(/^treino\/(\d+)$/);
+  const history = route === 'historico';
+  const summary = route.match(/^historico\/(\d+)$/);
+  const routines = route === 'treinos' || editing || adding || logging || history || summary;
+  const active = useLiveQuery(() => activeWorkout());
 
   // separate search so picking doesn't mess with the exercises tab
   const [pickFilters, setPickFilters] = useState<Filters>({ text: '', equipment: null, muscle: null });
@@ -84,6 +90,9 @@ export default function App() {
       </>
     );
   } else if (editing) page = <RoutineEditor id={Number(editing[1])} />;
+  else if (logging) page = <Workout id={Number(logging[1])} />;
+  else if (history) page = <History />;
+  else if (summary) page = <WorkoutSummary id={Number(summary[1])} />;
   else if (route === 'treinos') page = <Routines />;
   else if (exercise) page = <ExerciseDetail id={decodeURIComponent(exercise[1])} />;
   else page = <Library filters={filters} onFilters={setFilters} />;
@@ -109,6 +118,11 @@ export default function App() {
           <a href="#/estudos" aria-current={studies ? 'page' : undefined}>Estudos</a>
         </nav>
       </header>
+      {active && !logging && (
+        <a className="in-progress" href={`#/treino/${active.id}`}>
+          {active.name} em andamento · <u>voltar pro treino</u>
+        </a>
+      )}
       <main>
         {page}
       </main>

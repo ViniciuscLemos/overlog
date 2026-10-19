@@ -1,13 +1,15 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect } from 'react';
-import { createRoutine, db, moveRoutine } from '../lib/db';
+import { activeWorkout, createRoutine, db, lastFinishedWorkout, moveRoutine, startWorkout } from '../lib/db';
 import { nextInRotation, suggestName, totalSets } from '../lib/routines';
+import { dateLabel } from '../lib/workouts';
 import { Backup } from './Backup';
 
 export function Routines() {
   const routines = useLiveQuery(() => db.routines.orderBy('position').toArray());
-  // TODO: pass the last logged workout once logging exists
-  const next = routines && nextInRotation(routines, null);
+  const last = useLiveQuery(() => lastFinishedWorkout());
+  const active = useLiveQuery(() => activeWorkout());
+  const next = routines && nextInRotation(routines, last?.routineId ?? null);
 
   useEffect(() => {
     document.title = 'Treinos · Overlog';
@@ -21,6 +23,10 @@ export function Routines() {
     window.location.hash = `#/treinos/${id}`;
   }
 
+  async function start(routineId: number) {
+    window.location.hash = `#/treino/${await startWorkout(routineId)}`;
+  }
+
   if (!routines) return null;
 
   return (
@@ -30,6 +36,19 @@ export function Routines() {
         Monta quantos quiser, na ordem que você faz. Depois do último volta pro primeiro, não fica preso a dia da
         semana.
       </p>
+
+      {active ? (
+        <a className="primary as-button" href={`#/treino/${active.id}`}>Continuar {active.name}</a>
+      ) : (
+        next && next.exercises.length > 0 && (
+          <button type="button" className="primary" onClick={() => start(next.id!)}>Começar {next.name}</button>
+        )
+      )}
+      {last && (
+        <p className="count">
+          Último: {last.name}, {dateLabel(last.startedAt)} · <a href="#/historico">histórico</a>
+        </p>
+      )}
 
       <ol className="rotation">
         {routines.map((r, i) => (
