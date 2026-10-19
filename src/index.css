@@ -187,3 +187,6 @@ main { max-width: 680px; margin: 0 auto; padding: 0 16px 40px; }
 .workout-bar .primary { width: auto; margin: 0; padding: 0 22px; }
 .summary { margin-top: 14px; }
 .slot .last { margin-top: 4px; }
+.chart { margin: 10px 0 4px; color: var(--strong); }
+.chart svg { display: block; width: 100%; height: auto; }
+.chart figcaption { color: var(--muted); font-size: 13px; margin-top: 4px; }

@@ -4,6 +4,7 @@ import { db, saveRoutine } from '../lib/db';
 import { addExercise } from '../lib/routines';
 import { displayName, imageUrl, loadExercises, similar, type Exercise } from '../lib/exercises';
 import { EQUIPMENT, MECHANICS, MUSCLES } from '../lib/labels';
+import { ExerciseHistory } from './ExerciseHistory';
 
 export function ExerciseDetail({ id }: { id: string }) {
   const [exercise, setExercise] = useState<Exercise | null | undefined>(undefined);
@@ -113,7 +114,9 @@ export function ExerciseDetail({ id }: { id: string }) {
         )}
       </dl>
 
-      <h3>Como fazer</h3>
+      <ExerciseHistory exerciseId={exercise.id} />
+
+      <h3 className="similar-title">Como fazer</h3>
       <p className="muted">O passo a passo ainda tá em inglês, vou traduzindo aos poucos.</p>
       <ol className="steps" lang="en">
         {exercise.steps.map((step) => (
