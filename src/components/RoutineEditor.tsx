@@ -160,7 +160,7 @@ export function RoutineEditor({ id }: { id: number }) {
       <div className="editor-actions">
         <button
           type="button"
-          className="danger"
+          className="secondary"
           onClick={async () => {
             const copy = await duplicateRoutine(id);
             if (copy) window.location.hash = `#/treinos/${copy}`;

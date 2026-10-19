@@ -133,8 +133,9 @@ main { max-width: 680px; margin: 0 auto; padding: 0 16px 40px; }
 .note { width: 100%; margin-top: 6px; font-size: 14px; }
 .as-button { display: block; text-align: center; line-height: 48px; text-decoration: none; }
 .per-muscle { color: var(--muted); font-size: 14px; margin: 14px 0 0; }
-.editor-actions { display: flex; gap: 22px; }
-.danger { margin-top: 28px; border: 0; background: none; color: #b0b0b0; font: inherit; font-size: 14px; text-decoration: underline; cursor: pointer; }
+.editor-actions { display: flex; gap: 22px; margin-top: 28px; }
+.secondary, .danger { border: 0; background: none; padding: 0; color: var(--text); font: inherit; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.danger { color: var(--muted); margin-left: auto; }
 
 .credits { max-width: 680px; margin: 0 auto; color: var(--muted); font-size: 12px; padding: 0 16px 32px; }
 
