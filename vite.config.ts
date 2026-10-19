@@ -4,7 +4,7 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
-  // served from github.com/ViniciuscLemos/overlog's Pages, under /overlog/
+  // github pages
   base: '/overlog/',
   plugins: [
     react(),
@@ -29,11 +29,10 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // the exercise list is its own ~800 KB chunk, above workbox's 2 MB default it'd be skipped
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         runtimeCaching: [
           {
-            // the gym has bad signal: a drawing seen once stays on the phone
+            // gym has bad signal
             urlPattern: /^https:\/\/raw\.githubusercontent\.com\/everkinetic\/data\//,
             handler: 'CacheFirst',
             options: {
@@ -46,7 +45,7 @@ export default defineConfig({
       },
     }),
   ],
-  // the only big chunk is the exercise list, loaded on its own after the first paint
+  // exercises.json chunk
   build: { chunkSizeWarningLimit: 1000 },
   test: {
     environment: 'node',

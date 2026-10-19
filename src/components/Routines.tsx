@@ -5,7 +5,7 @@ import { nextInRotation, suggestName, totalSets } from '../lib/routines';
 
 export function Routines() {
   const routines = useLiveQuery(() => db.routines.orderBy('position').toArray());
-  // the rotation moves on once workouts get logged; until then it starts at the first one
+  // TODO: pass the last logged workout once logging exists
   const next = routines && nextInRotation(routines, null);
 
   useEffect(() => {

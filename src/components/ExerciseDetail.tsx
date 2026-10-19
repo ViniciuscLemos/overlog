@@ -10,7 +10,6 @@ export function ExerciseDetail({ id }: { id: string }) {
   const [others, setOthers] = useState<Exercise[]>([]);
   const routines = useLiveQuery(() => db.routines.orderBy('position').toArray());
   const [added, setAdded] = useState('');
-  // opening another exercise from "Parecidos" shouldn't keep the last message
   useEffect(() => setAdded(''), [id]);
 
   useEffect(() => {
@@ -21,7 +20,6 @@ export function ExerciseDetail({ id }: { id: string }) {
     });
   }, [id]);
 
-  // the tab (and the iOS app switcher) shows which exercise is open
   useEffect(() => {
     if (!exercise) return;
     document.title = `${displayName(exercise)} · Overlog`;
@@ -39,7 +37,6 @@ export function ExerciseDetail({ id }: { id: string }) {
     <article className="detail">
       <div className="detail-top">
         <a className="back" href="#/">‹ Exercícios</a>
-        {/* on the phone this opens the share sheet, to send the exercise to a friend */}
         {'share' in navigator && (
           <button
             type="button"
@@ -53,7 +50,6 @@ export function ExerciseDetail({ id }: { id: string }) {
       <h2>{displayName(exercise)}</h2>
       {exercise.pt && <p className="en">{exercise.en}</p>}
 
-      {/* the two drawings are the start and the end of the movement */}
       <div className="photos">
         {exercise.images.map((img, i) => (
           <figure key={img}>

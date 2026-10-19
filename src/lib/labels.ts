@@ -1,4 +1,4 @@
-// How the gym calls things in Brazil. The keys are free-exercise-db's values.
+// keys are the values in exercises.json
 
 export const EQUIPMENT: Record<string, string> = {
   barbell: 'Barra',
@@ -42,8 +42,7 @@ export const MECHANICS: Record<string, string> = {
   isolation: 'Isolado (uma articulação)',
 };
 
-
-// the order the filter chips show up in: what a normal gym has first
+// common gym stuff first
 export const EQUIPMENT_ORDER = ['barbell', 'dumbbell', 'cable', 'machine', 'smith', 'body only', 'e-z curl bar',
   'plate', 'bands', 'medicine ball', 'exercise ball'];
 

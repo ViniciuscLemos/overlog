@@ -1,4 +1,3 @@
-// Everything the user writes stays on the phone, in IndexedDB.
 import Dexie, { type EntityTable } from 'dexie';
 import type { Routine } from './routines';
 
@@ -30,11 +29,10 @@ export const db = new Dexie('overlog') as Dexie & {
 db.version(1).stores({
   routines: '++id, name',
   workouts: '++id, routineId, startedAt',
-  // [exerciseId+doneAt] answers "what did I do last time on this exercise"
+  // [exerciseId+doneAt] is for "last time" on an exercise
   sets: '++id, workoutId, exerciseId, [exerciseId+doneAt]',
 });
 
-// workouts are kept in the order of the rotation
 db.version(2).stores({ routines: '++id, position' });
 
 export async function createRoutine(name: string) {
@@ -46,7 +44,6 @@ export async function createRoutine(name: string) {
 export const saveRoutine = (id: number, changes: Partial<Routine>) =>
   db.routines.update(id, { ...changes, updatedAt: Date.now() });
 
-/** Swaps a workout with its neighbour in the rotation. */
 export async function moveRoutine(id: number, by: -1 | 1) {
   await db.transaction('rw', db.routines, async () => {
     const all = await db.routines.orderBy('position').toArray();
@@ -60,7 +57,6 @@ export async function moveRoutine(id: number, by: -1 | 1) {
 
 export const deleteRoutine = (id: number) => db.routines.delete(id);
 
-/** A copy at the end of the rotation: Upper 2 usually starts as Upper 1 with a few swaps. */
 export async function duplicateRoutine(id: number) {
   const source = await db.routines.get(id);
   if (!source) return undefined;

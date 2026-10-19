@@ -11,8 +11,7 @@ const REST_OPTIONS = Array.from({ length: 10 }, (_, i) => (i + 1) * 30);
 export function RoutineEditor({ id }: { id: number }) {
   const routine = useLiveQuery(() => db.routines.get(id), [id]);
   const [byId, setById] = useState<Map<string, Exercise>>(new Map());
-  // what's on screen while typing; it goes to the database as you type (text) or when you
-  // leave a number field, so clearing "9" to type "12" doesn't get "fixed" halfway
+  // numbers only get saved on blur, otherwise clearing "9" to type "12" gets clamped halfway
   const [draft, setDraft] = useState<Routine | null>(null);
   useEffect(() => {
     if (routine && (!draft || draft.id !== routine.id)) setDraft(routine);
@@ -32,7 +31,6 @@ export function RoutineEditor({ id }: { id: number }) {
   if (routine === undefined || (routine && !draft)) return null;
   if (!routine || !draft) return <p className="muted">Esse treino não existe mais. <a href="#/treinos">Voltar</a></p>;
 
-  // there's no "save" button to forget: changes go to the phone's database right away
   const setExercises = (exercises: RoutineExercise[]) => {
     setDraft({ ...draft, exercises });
     saveRoutine(id, { exercises });
@@ -87,7 +85,7 @@ export function RoutineEditor({ id }: { id: number }) {
                     ↓
                   </button>
                   <button type="button" aria-label="Tirar do treino" onClick={() => {
-                      // the ✕ is small and next to the arrows: easy to hit by accident on the phone
+                      // easy to hit by accident next to the arrows
                       const name = exercise ? displayName(exercise) : 'esse exercício';
                       if (window.confirm(`Tirar ${name} do treino?`)) setExercises(removeAt(draft.exercises, i));
                     }}
@@ -128,7 +126,6 @@ export function RoutineEditor({ id }: { id: number }) {
                 <label>
                   Descanso
                   <select value={item.restSeconds} onChange={(e) => setExercises(draft.exercises.map((x, j) => (j === i ? { ...x, restSeconds: Number(e.target.value) } : x)))}>
-                    {/* a rest outside the list (from a backup, say) still shows instead of a blank */}
                     {(REST_OPTIONS.includes(item.restSeconds) ? REST_OPTIONS : [...REST_OPTIONS, item.restSeconds].sort((a, b) => a - b)).map((s) => (
                       <option key={s} value={s}>{restLabel(s)}</option>
                     ))}

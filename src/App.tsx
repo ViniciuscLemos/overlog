@@ -9,13 +9,12 @@ import { db, saveRoutine } from './lib/db';
 import { addExercise } from './lib/routines';
 import type { Filters } from './lib/exercises';
 
-// a hash router is enough here and works the same installed or in a tab
 const isList = (hash: string) => hash.replace(/^#\/?/, '') === '';
 
 function useRoute() {
   const [hash, setHash] = useState(window.location.hash);
   useEffect(() => {
-    // going back to the list lands where you were, anything else starts at the top
+    // back to the list keeps the scroll, other pages start at the top
     let listScroll = 0;
     let onList = isList(window.location.hash);
     const onChange = () => {
@@ -23,7 +22,7 @@ function useRoute() {
       onList = isList(window.location.hash);
       setHash(window.location.hash);
       const y = onList ? listScroll : 0;
-      // after the next paint, when the list is back on the page
+      // two frames so the list is on the page again
       requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, y)));
     };
     window.addEventListener('hashchange', onChange);
@@ -37,21 +36,19 @@ function savedFilters(): Filters {
     const saved = JSON.parse(sessionStorage.getItem('filters') ?? 'null');
     if (saved && typeof saved.text === 'string') return saved;
   } catch {
-    // nothing saved, or storage not available
+    // nothing saved
   }
   return { text: '', equipment: null, muscle: null };
 }
 
 export default function App() {
   const route = useRoute();
-  // kept here so going back from an exercise keeps the search
   const [filters, setFilters] = useState<Filters>(savedFilters);
-  // a reload (or iOS bringing the app back) keeps the search where it was
   useEffect(() => {
     try {
       sessionStorage.setItem('filters', JSON.stringify(filters));
     } catch {
-      // private mode can refuse storage; the search just starts empty next time
+      // private mode
     }
   }, [filters]);
   const exercise = route.match(/^exercicio\/(.+)$/);
@@ -60,7 +57,7 @@ export default function App() {
   const adding = route.match(/^treinos\/(\d+)\/adicionar$/);
   const routines = route === 'treinos' || editing || adding;
 
-  // the "add to workout" search is its own, so it doesn't change the exercises tab
+  // separate search so picking doesn't mess with the exercises tab
   const [pickFilters, setPickFilters] = useState<Filters>({ text: '', equipment: null, muscle: null });
   const addingTo = useLiveQuery(() => (adding ? db.routines.get(Number(adding[1])) : undefined), [adding?.[1]]);
 
@@ -95,7 +92,6 @@ export default function App() {
     <>
       <header className="top">
         <a href="#/" className="logo">
-          {/* the dumbbell going up: the weight on the bar going up over time */}
           <svg viewBox="0 0 512 512" width="26" height="26" aria-hidden="true">
             <g fill="currentColor" transform="rotate(-30 256 256)">
               <rect x="86" y="196" width="34" height="120" rx="8" />

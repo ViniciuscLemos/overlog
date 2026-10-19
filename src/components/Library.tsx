@@ -7,7 +7,7 @@ const PAGE = 40;
 interface Props {
   filters: Filters;
   onFilters: (f: Filters) => void;
-  /** when set, tapping an exercise picks it (adding to a workout) instead of opening its page */
+  // picking for a workout instead of opening the page
   onPick?: (exercise: Exercise) => void;
   alreadyIn?: Set<string>;
 }
@@ -21,7 +21,7 @@ export function Library({ filters, onFilters, onPick, alreadyIn }: Props) {
   }, []);
 
   const results = useMemo(() => (all ? search(all, filters) : []), [all, filters]);
-  // how many exercises each muscle has with the equipment chosen, so empty ones can go
+  // to hide muscles with nothing for the chosen equipment
   const perMuscle = useMemo(() => {
     const count: Record<string, number> = {};
     for (const e of all ?? []) {
@@ -30,7 +30,6 @@ export function Library({ filters, onFilters, onPick, alreadyIn }: Props) {
     }
     return count;
   }, [all, filters.equipment]);
-  // a new search starts from the top of the list again
   useEffect(() => setShown(PAGE), [filters]);
 
   const set = (patch: Partial<Filters>) => onFilters({ ...filters, ...patch });
@@ -43,7 +42,7 @@ export function Library({ filters, onFilters, onPick, alreadyIn }: Props) {
           placeholder="Buscar exercício"
           value={filters.text}
           onChange={(e) => set({ text: e.target.value })}
-          // "Buscar" on the phone keyboard closes it, so the list is visible again
+          // close the keyboard on the phone
           onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
           enterKeyHint="search"
           aria-label="Buscar exercício"
