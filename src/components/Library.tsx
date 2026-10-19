@@ -119,7 +119,16 @@ export function Library({ filters, onFilters, onPick, alreadyIn }: Props) {
               Mostrar mais ({results.length - shown})
             </button>
           )}
-          {results.length === 0 && <p className="muted">Nada com esses filtros.</p>}
+          {results.length === 0 && (
+            <p className="muted">
+              Nada com esses filtros.{' '}
+              {filters.text && (filters.equipment || filters.muscle) && (
+                <button type="button" className="clear" onClick={() => set({ equipment: null, muscle: null })}>
+                  Buscar "{filters.text}" em tudo
+                </button>
+              )}
+            </p>
+          )}
         </>
       )}
     </section>
