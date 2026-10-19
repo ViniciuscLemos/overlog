@@ -1,5 +1,4 @@
-// The studies tab: short, plain summaries of the research behind the app, each with a link
-// to the paper so people read the real thing. Every DOI here was checked against Crossref.
+// every DOI here was checked on Crossref before going in
 
 export interface Study {
   topic: string;
