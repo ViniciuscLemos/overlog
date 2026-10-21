@@ -21,6 +21,9 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait',
         categories: ['health', 'fitness', 'sports'],
+        // same app even if the start page changes later
+        id: '/overlog/',
+        scope: '.',
         start_url: '.',
         icons: [
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
