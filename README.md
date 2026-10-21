@@ -60,6 +60,8 @@ npm run dev
 npm test
 ```
 
+It needs Node 22 (there's an `.nvmrc`). Before pushing, `npm run lint` and `npm run build` are the same checks the CI runs, and `npm run test:watch` reruns the tests while editing.
+
 `scripts/import-exercises.mjs` builds the exercise list from Everkinetic's data (instructions at the top of the file). Portuguese names are in `scripts/names-pt.json`.
 
 ## Credits
