@@ -2,6 +2,10 @@
   "name": "overlog",
   "private": true,
   "version": "0.0.0",
+  "description": "Gym log for progressive overload: sets, routines, progress and the studies behind it.",
+  "homepage": "https://viniciusclemos.github.io/overlog/",
+  "repository": "github:ViniciuscLemos/overlog",
+  "license": "MIT",
   "type": "module",
   "engines": {
     "node": ">=22"
