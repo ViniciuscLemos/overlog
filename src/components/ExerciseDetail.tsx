@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { db, saveRoutine } from '../lib/db';
 import { addExercise } from '../lib/routines';
 import { displayName, imageUrl, loadExercises, similar, type Exercise } from '../lib/exercises';
-import { EQUIPMENT, MECHANICS, MUSCLES } from '../lib/labels';
+import { EQUIPMENT, MUSCLES, mechanicLabel } from '../lib/labels';
 import { t } from '../lib/i18n';
 import { ExerciseHistory } from './ExerciseHistory';
 
@@ -94,10 +94,10 @@ export function ExerciseDetail({ id }: { id: string }) {
             <dd>{muscles(exercise.secondary)}</dd>
           </>
         )}
-        {exercise.mechanic && MECHANICS[exercise.mechanic] && (
+        {mechanicLabel(exercise.mechanic) && (
           <>
             <dt>{t.exercise.type}</dt>
-            <dd>{MECHANICS[exercise.mechanic]}</dd>
+            <dd>{mechanicLabel(exercise.mechanic)}</dd>
           </>
         )}
         {inRoutines.length > 0 && (

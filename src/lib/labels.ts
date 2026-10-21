@@ -78,16 +78,24 @@ const MUSCLES_EN: Record<string, string> = {
 const MECHANICS_PT: Record<string, string> = {
   compound: 'Composto (várias articulações)',
   isolation: 'Isolado (uma articulação)',
+  isometric: 'Isométrico (parado na posição)',
 };
 
 const MECHANICS_EN: Record<string, string> = {
   compound: 'Compound (several joints)',
   isolation: 'Isolation (one joint)',
+  isometric: 'Isometric (holding the position)',
 };
 
 export const EQUIPMENT = lang === 'en' ? EQUIPMENT_EN : EQUIPMENT_PT;
 export const MUSCLES = lang === 'en' ? MUSCLES_EN : MUSCLES_PT;
 export const MECHANICS = lang === 'en' ? MECHANICS_EN : MECHANICS_PT;
+
+// some exercises are "compound, isolation" in the data
+export function mechanicLabel(mechanic: string | null) {
+  const labels = (mechanic ?? '').split(', ').map((m) => MECHANICS[m]);
+  return labels.every(Boolean) ? labels.join(' / ') : null;
+}
 
 // common gym stuff first
 export const EQUIPMENT_ORDER = ['barbell', 'dumbbell', 'cable', 'machine', 'smith', 'body only', 'e-z curl bar',
