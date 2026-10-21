@@ -3,12 +3,17 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -b",
     "import-exercises": "node scripts/import-exercises.mjs"
   },
   "dependencies": {
