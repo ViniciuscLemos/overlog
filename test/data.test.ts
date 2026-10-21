@@ -11,4 +11,9 @@ describe('exercise list', () => {
   it('every exercise works at least one muscle and says how to do it', () => {
     expect(exercises.filter((e) => e.primary.length === 0 || e.steps.length === 0).map((e) => e.id)).toEqual([]);
   });
+
+  it('drawings are relative png paths, so they load from the image base', () => {
+    const bad = exercises.flatMap((e) => e.images).filter((p) => !p.endsWith('.png') || p.startsWith('/') || p.includes('://'));
+    expect(bad).toEqual([]);
+  });
 });
