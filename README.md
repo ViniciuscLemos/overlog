@@ -6,7 +6,7 @@ Gym log I'm making for myself. Progressive overload + log.
 
 It's live at https://viniciusclemos.github.io/overlog/. On the iPhone open it in Safari, Share > Add to Home Screen, and it works offline like an app.
 
-I made it in Portuguese first because that's how I use it, and there's an English version of everything for the rest. The phone's language picks one, there's a switch at the bottom of the page, and https://viniciusclemos.github.io/overlog/?lang=en opens straight in English. The screenshots here are the English one.
+I made it in Portuguese first because that's how I use it, and there's an English version of everything for the rest. The phone's language picks one, there's an EN / PT switch next to the menu, and https://viniciusclemos.github.io/overlog/?lang=en opens straight in English. The screenshots here are the English one.
 
 <p>
   <img src="docs/logging.png" alt="Logging Upper 1 with a partner: kg, reps and RIR per set, last time, what to do today, Me and Alex tabs and the rest countdown at the bottom" width="250">
