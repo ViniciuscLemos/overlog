@@ -120,6 +120,9 @@ export default function App() {
           <a href="#/" aria-current={exercise || studies || routines || settings ? undefined : 'page'}>{t.nav.exercises}</a>
           <a href="#/treinos" aria-current={routines ? 'page' : undefined}>{t.nav.workouts}</a>
           <a href="#/estudos" aria-current={studies ? 'page' : undefined}>{t.nav.studies}</a>
+          <button type="button" className="lang" aria-label={t.nav.switchLang} title={t.nav.switchLang} onClick={() => setLang(lang === 'pt' ? 'en' : 'pt')}>
+            {t.nav.otherLang}
+          </button>
         </nav>
       </header>
       {active && !logging && route !== 'treinos' && (

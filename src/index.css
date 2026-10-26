@@ -31,6 +31,12 @@ main { max-width: 680px; margin: 0 auto; padding: 0 16px 40px; }
 .top nav { display: flex; gap: 16px; font-size: 15px; }
 .top nav a { text-decoration: none; color: var(--muted); }
 .top nav a[aria-current] { color: var(--strong); }
+.top nav .lang { padding: 0; border: 0; background: none; font: inherit; font-size: 13px; letter-spacing: 0.5px; color: var(--muted); cursor: pointer; }
+/* with the language switch the header gets tight on small phones */
+@media (max-width: 400px) {
+  .logo { font-size: 20px; }
+  .top nav { gap: 12px; font-size: 14px; }
+}
 
 .search { display: flex; gap: 8px; margin: 14px 0 6px; }
 .search input, .search select {

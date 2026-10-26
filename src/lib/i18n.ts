@@ -31,7 +31,7 @@ export function setLang(next: Lang) {
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 const pt = {
-  nav: { exercises: 'Exercícios', workouts: 'Treinos', studies: 'Estudos' },
+  nav: { exercises: 'Exercícios', workouts: 'Treinos', studies: 'Estudos', otherLang: 'EN', switchLang: 'Mudar para inglês' },
   credits: { drawings: 'Desenhos dos exercícios:', code: 'Código aberto no', other: 'English' },
   inProgress: (name: string) => `${name} em andamento`,
   backToWorkout: 'voltar pro treino',
@@ -217,7 +217,7 @@ const pt = {
 };
 
 const en: typeof pt = {
-  nav: { exercises: 'Exercises', workouts: 'Workouts', studies: 'Studies' },
+  nav: { exercises: 'Exercises', workouts: 'Workouts', studies: 'Studies', otherLang: 'PT', switchLang: 'Switch to Portuguese' },
   credits: { drawings: 'Exercise drawings:', code: 'Source code on', other: 'Português' },
   inProgress: (name: string) => `${name} in progress`,
   backToWorkout: 'back to the workout',
